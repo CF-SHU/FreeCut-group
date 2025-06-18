@@ -58,34 +58,16 @@ ApplicationWindow {
            RowLayout{
                spacing:0
                anchors.fill:parent
-                Rectangle{
-                    id:leftRect
-                    implicitWidth:window.height / 4
-                    implicitHeight:cenRect.implicitHeight
-                    color:"green"
-                    border.color:"green"
-
-
-                }
-                Rectangle{
-                    id:_cRect
-                    implicitWidth:(window.width - (window.width / 4)) / 2
-                    implicitHeight:cenRect.implicitHeight
-                    color:"blue"
-                    border.color:"blue"
-                    Dialogs{
-                        id:dialogs
-                    }
-
-                ToolBar
-                    {
-                        RowLayout{
-                            ToolButton{action:actions.start}
-                            ToolButton{action:actions.pause}
-                            ToolButton{action:actions.stop}
-                        }
-                    }
-
+               Rectangle{
+                   id:leftRect
+                   implicitWidth:(window.width / 2)
+                   implicitHeight:cenRect.implicitHeight
+                   color:"green"
+                   border.color:"green"
+                   Contents{
+                       id:content
+                       anchors.fill: parent
+                   }
                 }
                 Rectangle{
                     id:rightRect
@@ -217,9 +199,30 @@ ApplicationWindow {
     }
     Actions{
         id:actions
-        open.onTriggered:dialogs.openfile.open()
+        open.onTriggered:content.dialog.openfile.open()
         about.onTriggered: dialogs.about.open()
         a.onTriggered:oneplayer.openfile.open()
     }
+    Dialogs{
+        id:dialogs
+    }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

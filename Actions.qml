@@ -48,7 +48,7 @@ Item {
         text:qsTr("&Stop...")
         icon.name:"media-playback-stop"
         onTriggered:{
-            dialogs.mplay.stop()
+            content.mplay.stop()
         }
     }
     Action
@@ -57,7 +57,7 @@ Item {
         text:qsTr("&Pause...")
         icon.name:"media-playback-pause"
         onTriggered:{
-            dialogs.mplay.pause()
+            content.mplay.pause()
         }
     }
     Action
@@ -66,7 +66,7 @@ Item {
         text:qsTr("&start...")
         icon.name:"media-playback-start"
         onTriggered:{
-            dialogs.mplay.play()
+            content.mplay.play()
         }
     }
     Action
