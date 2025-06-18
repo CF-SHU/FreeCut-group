@@ -23,6 +23,7 @@ qt_add_qml_module(appVideoclips
     QML_FILES
     QML_FILES Player.qml
     QML_FILES Contents.qml
+    SOURCES videocutter.h videocutter.cpp
 )
 
 target_compile_features(appVideoclips PRIVATE cxx_std_23)

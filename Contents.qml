@@ -4,18 +4,12 @@ import QtQuick.Layouts
 import QtMultimedia
 
 Item {
-    //property alias vmodel:vmodel
     property alias dialog:_dialog
     property int currentPlayingIndex: -1
     property alias mplay:_mplay
-    //property alias vvvv:_vvvv
 
     Dialogs{
         id:_dialog
-        //当用户取消文件选择对话框时执行,fileOpen是Dialogs的一个property
-        // fileOpen.onRejected: {
-        //     return;
-        // }
         openfile{
             onRejected:{
                 return;
@@ -55,13 +49,6 @@ Item {
                 ScrollBar.vertical: ScrollBar {
                     policy: ScrollBar.AsNeeded
                 }
-                //ScrollBar.vertical:指定为垂直方向的滚动条
-                //policy: ScrollBar.AsNeeded:滚动条的显示策略
-                //AsNeeded 表示只有当内容超出可视区域时才显示滚动条
-                //ScrollBar.AlwaysOff - 永不显示
-                //ScrollBar.AlwaysOn - 始终显示
-                //ScrollBar.AsNeeded - 按需显示（推荐）
-
                 model:ListModel{
                     id:musicModel
                 }
@@ -82,10 +69,6 @@ Item {
                     Video{
                         id:_vvvv
                         anchors.fill: parent
-                        //anchors.right: tt.left
-                        // anchors.left:parent.left
-                        // anchors.top: parent.top
-                        // anchors.bottom: parent.bottom
                         source: model.filePath
                         autoPlay: true
                         muted: true
@@ -160,13 +143,13 @@ Item {
             color: "blue"
 
             ToolBar
-                {
-                    RowLayout{
-                        ToolButton{action:act.start}
-                        ToolButton{action:act.pause}
-                        ToolButton{action:act.stop}
-                    }
+            {
+                RowLayout{
+                    ToolButton{action:act.start}
+                    ToolButton{action:act.pause}
+                    ToolButton{action:act.stop}
                 }
+            }
 
             MediaPlayer{
                 id:_mplay

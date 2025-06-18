@@ -15,7 +15,7 @@ ApplicationWindow {
     title: qsTr("VideoCut")
 
     // 定义按钮的初始状态
-       property int currentButton: 1 // 1: 第一个按钮可见
+    property int currentButton: 1 // 1: 第一个按钮可见
 
     // 格式化时间为 mm:ss
     function formatTime(milliseconds) {
@@ -53,9 +53,9 @@ ApplicationWindow {
             }
         Rectangle{
             id:cenRect
-            implicitHeight:(window.height / 2)// - topRect.implicitHeight
+            implicitHeight:(window.height / 2)
             implicitWidth:window.width
-           RowLayout{
+            RowLayout{
                spacing:0
                anchors.fill:parent
                Rectangle{
@@ -70,26 +70,40 @@ ApplicationWindow {
                    }
                 }
                 Rectangle{
-                    id:rightRect
-                    implicitWidth:window.width - (window.width / 4)
-                    implicitHeight:cenRect.implicitHeight
-                    color:"black"
-                    border.color:"black"
-                    Player{
-                        id:oneplayer
-                    }
-                    ToolBar
-                    {
-                        RowLayout
-                        {
-                            ToolButton{action:actions.a}//open
-                            ToolButton{action:actions.aa}//start
-                            ToolButton{action:actions.bb}//pause
-                            ToolButton{action:actions.cc}//stop
-                        }
-                    }
+                   id:rightRect
+                   implicitWidth:window.width - (window.width / 4)
+                   implicitHeight:cenRect.implicitHeight
+                   color:"black"
+                   border.color:"black"
+                   Player{
+                       id:oneplayer
+                   }
+                   ToolBar
+                   {
+                       RowLayout
+                       {
+                           ToolButton{action:actions.a}//open
+                           ToolButton{action:actions.aa}//start
+                           ToolButton{action:actions.bb}//pause
+                           ToolButton{action:actions.cc}//stop
+                       }
+                   }
 
                 }
+            }
+        }
+
+        VideoCutter {
+            id: cutter
+            onProgressChanged: {
+                progressBar.value = percent
+                progressLabel.text = percent + "%"
+            }
+            onFinished: (success, error) => {
+                console.log("剪切结果:", success, error)
+                resultText.text = success ? "剪切成功!" : "失败: " + error
+                resultText.color = success ? "green" : "red"
+                progressBar.visible = false
             }
         }
 
@@ -101,11 +115,10 @@ ApplicationWindow {
             border.color:"pink"
 
         // 时间轴 Slider
-           Slider {
+            Slider {
                id: slider
                y:50
                anchors.centerIn: parent.centerIn
-            //   anchors.horizontalCenter: parent.horizontalCenter
                width: parent.width - 40 // 留出一些边距
                from: 0
                to: oneplayer.mplay.duration > 0 ? oneplayer.mplay.duration : 1000 // 默认值为 1000 毫秒（1 秒），避免为 0
@@ -126,17 +139,14 @@ ApplicationWindow {
                anchors.bottom: slider.top
                anchors.horizontalCenter: parent.horizontalCenter
                spacing: 10
-
                Text {
                    text: formatTime(oneplayer.mplay.position)
                    color: "white"
                }
-
                Text {
                    text: "/"
                    color: "white"
                }
-
                Text {
                    text: formatTime(oneplayer.mplay.duration)
                    color: "white"
@@ -148,52 +158,80 @@ ApplicationWindow {
                 spacing: 20
 
                 Button {
-                    id: button1
-                    text:qsTr("剪辑开始")
-                    visible: currentButton === 1
-                    onClicked: {
-                        currentButton = 2
-                    }
+                   id: button1
+                   text:qsTr("剪辑开始")
+                   visible: currentButton === 1
+                   onClicked: {
+                       currentButton = 2
+                   }
                 }
 
                 Button {
-                    id: button2
-                    visible: currentButton === 2
-                    text:qsTr("选择该节点作为剪辑的第一个节点")
+                   id: button2
+                   visible: currentButton === 2
+                   text:qsTr("选择该节点作为剪辑的第一个节点")
                  // 格式化时间为秒数
-                    function formatTime(milliseconds) {
+                   function formatTime(milliseconds) {
                         return Math.floor(milliseconds / 1000); // 返回秒数
                    }
-                    onClicked: {
+                   onClicked: {
                         console.log("Current time:", formatTime(oneplayer.mplay.position)); // 打印当前时间
+                                      cutter.getStartSec(formatTime(oneplayer.mplay.position));
                         currentButton = 3
-                    }
+                   }
                 }
 
                 Button {
-                    id: button3
-                    visible: currentButton === 3
-                    text:qsTr("选择该节点作为剪辑的第二个节点")
+                   id: button3
+                   visible: currentButton === 3
+                   text:qsTr("选择该节点作为剪辑的第二个节点")
 
                  // 格式化时间为秒数
-                    function formatTime(milliseconds) {
-                    return Math.floor(milliseconds / 1000); // 返回秒数
+                   function formatTime(milliseconds) {
+                   return Math.floor(milliseconds / 1000); // 返回秒数
                    }
 
                    onClicked: {
                         console.log("Current time:", formatTime(oneplayer.mplay.position)); // 打印当前时间
-                        currentButton = 4
-                        }
+                        cutter.getEndSec(formatTime(oneplayer.mplay.position));
+                                      currentButton = 4
+                   }
                 }
 
                 Button {
-                    id: button4
-                    text:qsTr("确认")
-                    visible: currentButton === 4
-                    onClicked: {
-                        currentButton = 1
-                    }
+                   id: button4
+                   text:qsTr("确认")
+                   visible: currentButton === 4
+                   onClicked: {
+                       console.log("test cut path: ",dialogs.inputPath)
+                       cutter.cutVideo(dialogs.inputPath,dialogs.outputPath,cutter.returnStartSec(), cutter.returnEndSec()-cutter.returnStartSec())
+                       progressBar.visible = true
+                       progressBar.value = 0
+                       resultText.text = "处理中..."
+                       resultText.color = "blue"
+                       currentButton = 1
+                   }
                 }
+                ProgressBar {
+                    id: progressBar
+                    visible: false
+                    width: 200
+                    height: 20
+                    from: 0
+                    to: 100
+                    value: 0
+                    Label {
+                        id: progressLabel
+                        anchors.centerIn: parent
+                        text: "0%"
+                    }
+               }
+
+               Text {
+                   id: resultText
+                   font.pixelSize: 14
+                   width: 300
+               }
            }
         }
     }
@@ -208,21 +246,3 @@ ApplicationWindow {
     }
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

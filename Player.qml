@@ -8,9 +8,10 @@ import Videoclips 1.0
 Item {
     anchors.fill: parent
     property alias openfile:_openfile
-    property string path:""
-    //property alias about: _about
+    property alias savefile: _savefile
     property alias mplay:_mplay
+    property string inputPath: ""
+    property string outputPath: ""
 
     Button{
         id:_play
@@ -18,10 +19,9 @@ Item {
         width:200
         height:200
         text:qsTr("点我播放")
-
         onClicked:{
             _mplay.play()
-            //vplay.play(path)
+            visible = false
         }
     }
     FileDialog{
@@ -32,9 +32,22 @@ Item {
         fileMode: FileDialog.OpenFiles
         nameFilters:["Video files(* .mp4,* .flv,* .mkv)"]
         onAccepted: {
-            console.log(openfile.selectedFile)
-            //path = openfile.selectedFile.toString().replace("file://", "")
-            _mplay.source = openfile.selectedFile//播放器的资源绑定
+            inputPath = selectedFile.toString().replace("file://", "")
+            outputPath = "/root/output.mp4"
+            //去除openfile.selectedFile的路径中的"file://"
+            console.log("openfile path: ",inputPath)
+            _mplay.source = inputPath
+        }
+    }
+    FileDialog{
+        id:_savefile
+        title: "Save your cut video"
+        currentFolder:StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+        fileMode:FileDialog.SaveFile
+        nameFilters:[ "Audio files (*.mp3 *.oop *.mp4 *.wav)" ]
+        onAccepted: {
+            outputPath = selectedFile.toString().replace("file://", "")
+            console.log("输出文件路径:", path)
         }
     }
 
@@ -43,14 +56,14 @@ Item {
         videoOutput:out
         audioOutput:AudioOutput{}
         onPositionChanged: {
-                    if (!slider.pressed) { // 仅在用户未拖动滑块时更新
-                        slider.value = position;
-                        console.log("Current position:", formatTime(position)); // 实时打印当前时间
-                    }
-                }
-                onDurationChanged: {
-                    console.log("Video duration:", formatTime(duration)); // 调试输出视频时长
-                }
+            if (!slider.pressed) { // 仅在用户未拖动滑块时更新
+                slider.value = position;
+                console.log("Current position:", formatTime(position)); // 实时打印当前时间
+            }
+        }
+        onDurationChanged: {
+            console.log("Video duration:", formatTime(duration)); // 调试输出视频时长
+        }
 
     }
     VideoOutput{
