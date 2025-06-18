@@ -9,7 +9,7 @@ Item {
     anchors.fill: parent
     property alias openfile:_openfile
     property string path:""
-    property alias about: _about
+    //property alias about: _about
     property alias mplay:_mplay
 
     Button{
@@ -18,6 +18,7 @@ Item {
         width:200
         height:200
         text:qsTr("点我播放")
+
         onClicked:{
             _mplay.play()
             //vplay.play(path)
@@ -36,21 +37,20 @@ Item {
             _mplay.source = openfile.selectedFile//播放器的资源绑定
         }
     }
-   // VideoPlay{
-     //   id:vplay
-   // }
 
     MediaPlayer{
         id:_mplay
         videoOutput:out
         audioOutput:AudioOutput{}
-        // onMediaStatusChanged:{
-        //     if(_mplay.mediaStatus === MediaPlayer.LoadedMedia){
-        //         console.log("视频加载成功")
-        //     }else if(_mplay.mediaStatus === MediaPlayer.InvalidMedia){
-        //         console.log("视频加载失败")
-        //     }
-        // }
+        onPositionChanged: {
+                    if (!slider.pressed) { // 仅在用户未拖动滑块时更新
+                        slider.value = position;
+                        console.log("Current position:", formatTime(position)); // 实时打印当前时间
+                    }
+                }
+                onDurationChanged: {
+                    console.log("Video duration:", formatTime(duration)); // 调试输出视频时长
+                }
 
     }
     VideoOutput{
@@ -108,13 +108,4 @@ Item {
            }
        }
 
-    MessageDialog{
-        id:_about
-        modality: Qt.WindowModal
-        buttons:MessageDialog.Ok
-        text:"This is a simple vidio editor."
-        informativeText: qsTr("")
-        //请将下面的信息修改为你自己的名字和邮件
-        detailedText: "Copyright©2025  CHW (@qq.com)"
-    }
 }

@@ -21,6 +21,7 @@ qt_add_qml_module(appVideoclips
     SOURCES videoplay.h videoplay.cpp
     QML_FILES
     QML_FILES
+    QML_FILES Player.qml
 )
 
 target_compile_features(appVideoclips PRIVATE cxx_std_23)

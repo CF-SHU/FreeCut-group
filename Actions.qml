@@ -6,6 +6,14 @@ Item {
     property alias save: _save
     property alias quit: _quit
     property alias about: _about
+    property alias stop: _stop
+    property alias pause: _pause
+    property alias start: _start
+    property alias a:_a
+    property alias aa:_aa
+    property alias bb:_bb
+    property alias cc:_cc
+   // property alias a:_a
 
     Action {
         id: _open
@@ -34,5 +42,73 @@ Item {
         text: qsTr("关于")
         icon.name: "help-about"
     }
-
+    Action
+    {
+        id:_stop
+        text:qsTr("&Stop...")
+        icon.name:"media-playback-stop"
+        onTriggered:{
+            dialogs.mplay.stop()
+        }
+    }
+    Action
+    {
+        id:_pause
+        text:qsTr("&Pause...")
+        icon.name:"media-playback-pause"
+        onTriggered:{
+            dialogs.mplay.pause()
+        }
+    }
+    Action
+    {
+        id:_start
+        text:qsTr("&start...")
+        icon.name:"media-playback-start"
+        onTriggered:{
+            dialogs.mplay.play()
+        }
+    }
+    Action
+    {
+        id:_a
+        text:qsTr("&open...")
+        icon.name:"media-playback-start"
+        onTriggered:{
+            oneplayer.mplay.play()
+        }
+    }
+    Action
+    {
+        id:_cc
+        text:qsTr("&Stop...")
+        icon.name:"media-playback-stop"
+        onTriggered:{
+            oneplayer.mplay.stop()
+        }
+    }
+    Action
+    {
+        id:_bb
+        text:qsTr("&Pause...")
+        icon.name:"media-playback-pause"
+        onTriggered:{
+            oneplayer.mplay.pause()
+            if (oneplayer.mplay.playbackState === MediaPlayer.PlayingState) {
+                            oneplayer.mplay.pause();
+                            console.log("Paused at:", formatTime(oneplayer.mplay.position)); // 暂停时打印当前时间
+                        } else {
+                            oneplayer.mplay.play();
+                        }
+        }
+    }
+    Action
+    {
+        id:_aa
+        text:qsTr("&start...")
+        icon.name:"media-playback-start"
+        onTriggered:{
+            oneplayer.mplay.play()
+        }
+    }
 }
