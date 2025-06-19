@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Videoclips 1.0
-import "control.js" as Controll
+import "control.js" as Controller
 import QtQuick.Dialogs
 import QtCore
 import QtMultimedia
@@ -132,8 +132,8 @@ ApplicationWindow {
                anchors.horizontalCenter: parent.horizontalCenter
                spacing: 10
                Text {
-                   text: Controller.formatTime(_mplay.position)+" / "
-                         +Controller.formatTime(_mplay.duration)
+                   text: Controller.formatTime(oneplayer.mplay.position)+" / "
+                         +Controller.formatTime(oneplayer.mplay.duration)
                    color: "white"
                }
            }
@@ -227,9 +227,6 @@ ApplicationWindow {
         aa.onTriggered: oneplayer.mplay.play()
         bb.onTriggered: oneplayer.mplay.pause()
         cc.onTriggered: oneplayer.mplay.stop()
-    }
-    Dialogs{
-        id:dialogs
     }
 
 }
