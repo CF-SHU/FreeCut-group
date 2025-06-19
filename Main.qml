@@ -20,213 +20,43 @@ ApplicationWindow {
     ColumnLayout{
         anchors.fill:parent
         spacing:0
-            RowLayout{
-                MenuBar {
-                   Menu {
-                       title: qsTr("File")
-                       MenuItem { action: actions.open }
-                       MenuItem { action: actions.save }
-                       MenuItem { action: actions.quit }
-                   }
-                   Menu {
-                       title: qsTr("Help")
-                       MenuItem { action: actions.about }
-                   }
-                }
+        MenuBar {
+            Menu {
+                title: qsTr("File")
+                MenuItem { action: actions.open }
+                MenuItem { action: actions.save }
+                MenuItem { action: actions.quit }
             }
-            RowLayout{
-                ToolBar {
-                   RowLayout{
-                       ToolButton{ action: actions.open }
-                       ToolButton{ action: actions.save }
-                       ToolButton{ action: actions.quit }
-                   }
-                }
+            Menu {
+                title: qsTr("Help")
+                MenuItem { action: actions.about }
             }
+        }
+
+        ToolBar {
+            RowLayout{
+                ToolButton{ action: actions.open }
+                ToolButton{ action: actions.save }
+                ToolButton{ action: actions.quit }
+            }
+        }
+
         Rectangle{
             id:cenRect
-            implicitHeight:(window.height / 2)
-            implicitWidth:window.width
-            RowLayout{
-               spacing:0
-               anchors.fill:parent
-               Rectangle{
-                   id:leftRect
-                   implicitWidth:(window.width / 2)
-                   implicitHeight:cenRect.implicitHeight
-                   color:"green"
-                   border.color:"green"
-                   Contents{
-                       id:content
-                       anchors.fill: parent
-                   }
-                }
-                Rectangle{
-                   id:rightRect
-                   implicitWidth:window.width - (window.width / 4)
-                   implicitHeight:cenRect.implicitHeight
-                   color:"black"
-                   border.color:"black"
-                   Player{
-                       id:oneplayer
-                   }
-                   ToolBar
-                   {
-                       RowLayout
-                       {
-                           ToolButton{action:actions.a}//open
-                           ToolButton{action:actions.aa}//start
-                           ToolButton{action:actions.bb}//pause
-                           ToolButton{action:actions.cc}//stop
-                       }
-                   }
+            Layout.fillWidth: true
+            Layout.fillHeight: true
 
-                }
-            }
-        }
-
-        VideoCutter {
-            id: cutter
-            onProgressChanged: {
-                progressBar.value = percent
-                progressLabel.text = percent + "%"
-            }
-            onFinished: (success, error) => {
-                console.log("剪切结果:", success, error)
-                resultText.text = success ? "剪切成功!" : "失败: " + error
-                resultText.color = success ? "green" : "red"
-                progressBar.visible = false
-            }
-        }
-
-        Rectangle{
-            id:bottomRect
-            implicitHeight:window.height/2
-            implicitWidth:window.width
-            color:"pink"
-            border.color:"pink"
-
-        // 时间轴 Slider
-            Slider {
-               id: slider
-               y:50
-               anchors.centerIn: parent.centerIn
-               width: parent.width - 40 // 留出一些边距
-               from: 0
-               to: oneplayer.mplay.duration > 0 ? oneplayer.mplay.duration : 1000 // 默认值为 1000 毫秒（1 秒），避免为 0
-               value: oneplayer.mplay.position
-               stepSize: 1000 // 步长为 1 秒
-
-               // 当用户拖动 Slider 时，跳转到视频的相应位置
-               onValueChanged: {
-                   if (pressed) { // 仅在用户拖动滑块时更新
-                       console.log("Slider value changed to:", value); // 调试输出
-                       oneplayer.mplay.position = value; // 使用 position 属性跳转
-                   }
-               }
-           }
-
-           // 显示当前时间和总时长
-           Row {
-               anchors.bottom: slider.top
-               anchors.horizontalCenter: parent.horizontalCenter
-               spacing: 10
-               Text {
-                   text: Controller.formatTime(oneplayer.mplay.position)+" / "
-                         +Controller.formatTime(oneplayer.mplay.duration)
-                   color: "white"
-               }
-           }
-
-            Column {
-                anchors.centerIn: parent
-                spacing: 20
-
-                Button {
-                   id: button1
-                   text:qsTr("剪辑开始")
-                   visible: currentButton === 1
-                   onClicked: {
-                       currentButton = 2
-                   }
-                }
-
-                Button {
-                   id: button2
-                   visible: currentButton === 2
-                   text:qsTr("选择该节点作为剪辑的第一个节点")
-                   // 格式化时间为秒数
-                   function formatTime(milliseconds) {
-                        return Math.floor(milliseconds / 1000); // 返回秒数
-                   }
-                   onClicked: {
-                       console.log("Current time:", formatTime(oneplayer.mplay.position)); // 打印当前时间
-                       cutter.getStartSec(formatTime(oneplayer.mplay.position));
-                       currentButton = 3
-                   }
-                }
-
-                Button {
-                   id: button3
-                   visible: currentButton === 3
-                   text:qsTr("选择该节点作为剪辑的第二个节点")
-
-                   // 格式化时间为秒数
-                   function formatTime(milliseconds) {
-                       return Math.floor(milliseconds / 1000); // 返回秒数
-                   }
-
-                   onClicked: {
-                        console.log("Current time:", formatTime(oneplayer.mplay.position)); // 打印当前时间
-                        cutter.getEndSec(formatTime(oneplayer.mplay.position));
-                                      currentButton = 4
-                   }
-                }
-
-                Button {
-                   id: button4
-                   text:qsTr("确认")
-                   visible: currentButton === 4
-                   onClicked: {
-                       oneplayer.savefile.open()
-                       progressBar.visible = true
-                       progressBar.value = 0
-                       resultText.text = "处理中..."
-                       resultText.color = "blue"
-                       currentButton = 1
-                   }
-                }
-                ProgressBar {
-                    id: progressBar
-                    visible: false
-                    width: 200
-                    height: 20
-                    from: 0
-                    to: 100
-                    value: 0
-                    Label {
-                        id: progressLabel
-                        anchors.centerIn: parent
-                        text: "0%"
-                    }
-               }
-
-               Text {
-                   id: resultText
-                   font.pixelSize: 14
-                   width: 300
-               }
+           Contents{
+               id:content
+               anchors.fill: parent
            }
         }
+
     }
     Actions{
         id:actions
-        open.onTriggered:content.fileopen.openfile.open()
+        open.onTriggered:content.dialog.openfile.open()
         about.onTriggered: oneplayer.about.open()
-        a.onTriggered: oneplayer.openfile.open()
-        aa.onTriggered: oneplayer.mplay.play()
-        bb.onTriggered: oneplayer.mplay.pause()
-        cc.onTriggered: oneplayer.mplay.stop()
-    }
 
+    }
 }

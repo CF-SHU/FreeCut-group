@@ -1,7 +1,7 @@
 function processCut() {
     // console.log("test cut path: ",oneplayer.inputPath)
     // console.log("test save Path: ",oneplayer.outputPath)
-    cutter.cutVideo(oneplayer.inputPath,oneplayer.outputPath,cutter.returnStartSec(),
+    cutter.cutVideo(inputPath1,oneplayer.outputPath,cutter.returnStartSec(),
                     cutter.returnEndSec()-cutter.returnStartSec())
 }
 

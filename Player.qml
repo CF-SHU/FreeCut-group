@@ -25,6 +25,7 @@ Item {
         onAccepted: {
             _mplay.source = selectedFile
             inputPath = selectedFile.toString().replace("file://", "")
+             console.log("输出文件路径:", inputPath)
             //去除openfile.selectedFile的路径中的"file://"
         }
     }

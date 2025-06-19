@@ -3,11 +3,16 @@ import QtQuick.Controls
 import QtQuick.Layouts
 import QtMultimedia
 import "control.js" as Controller
+import QtQuick.Dialogs
+import QtCore
+import Videoclips 1.0
 
 Item {
-    property alias fileopen:_fileopen
+
+    property alias dialog:_dialog
     property int currentPlayingIndex: -1
     property alias mplay:_mplay
+    property string inputPath1: ""
 
     Player{
         id:_fileopen
@@ -33,29 +38,63 @@ Item {
         }
     }
 
-    Row{
+    ListModel{
+        id:videoModel
+    }
+    Player{
+        id:_dialog
+        openfile{
+            onRejected:{
+                return;
+            }//also OK!
+
+            onAccepted: {
+                let selectfilePath = openfile.selectedFiles;
+                for(let i = 0; i < selectfilePath.length; ++i){
+                    const filePath = selectfilePath[i]
+                    _mplay.source = filePath
+                    //vvvv.source = filePath
+                    const fileName = filePath.toString().split('/').pop().replace(/\.[^/.]+$/, "")
+                    //将路径字符串按斜杠
+                    videoModel.append({
+                        title: fileName,
+                        filePath: filePath,
+                    })
+                    console.log("Videos path: ",filePath)
+                }
+            }
+        }
+    }
+
+ColumnLayout{
+   anchors.fill: parent
+   spacing: 10 // 移除间距使布局更紧凑
+
+    RowLayout{
         anchors.fill: parent
+        height: parent.height * 0.5
+        spacing: 0 // 移除间距
+
         Rectangle{
             id:left
-            width: (parent.width / 3.8)
-            height: parent.height
+           Layout.preferredWidth: parent.width * 0.2
+           Layout.fillHeight: true
             color: "green"
+
             ListView{
-                id:musicList
+                id:videoList
                 anchors.fill:parent
                 spacing:5
 
                 ScrollBar.vertical: ScrollBar {
                     policy: ScrollBar.AsNeeded
                 }
-                model:ListModel{
-                    id:musicModel
-                }
 
+                model: videoModel  // 绑定到全局 videoModel
                 delegate:Rectangle{
                     id:rec
-                    width:musicList.width
-                    height:(musicList.height / 5)
+                    width:videoList.width
+                    height:(videoList.height / 10)
                     border.color: "lightblue"
                     radius: 5 //添加圆角半径
                     color:{
@@ -78,17 +117,18 @@ Item {
                         }
                     }
 
+
                     TapHandler {
                         onTapped: {
                             content.currentPlayingIndex = index
-                            console.log("now video index & currentPlayingIndex is ",index,content.currentPlayingIndex)
+                            console.log("now music index & currentPlayingIndex is ",index,content.currentPlayingIndex)
                             _mplay.source = model.filePath
                             _mplay.play()
                         }
                         onDoubleTapped:{
                             if(content.currentPlayingIndex===index){
-                                if (_player.playbackState === MediaPlayer.PlayingState) {
-                                    _player.pause()
+                                if (_mplay.playbackState === MediaPlayer.PlayingState) {
+                                    _mplay.pause()
                                 }
                             }
                         }
@@ -98,94 +138,392 @@ Item {
                     Behavior on color {
                         ColorAnimation { duration: 1500 }
                     }
-                    // 播放状态图标
-                    Image {
-                        visible: currentPlayingIndex === index && _mplay.playing
-                        source: "playing-icon.png"
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.right: parent.right
-                        anchors.rightMargin: 10
-                        width: 16
-                        height: 16
-                    }
-
-                    // 暂停状态图标
-                    Image {
-                        visible: currentPlayingIndex === index && !_mplay.playing
-                        source: "paused-icon.png"
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.right: parent.right
-                        anchors.rightMargin: 10
-                        width: 16
-                        height: 16
-                    }
                 }
 
+                //添加动画
                 add: Transition {
                     NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 2000 }
                 }//透明度动画
             }
         }
         Rectangle{
-            id:right
-            width: parent.width - left.width
-            height: parent.height
+            id:mid
+
+           Layout.preferredWidth: parent.width * 0.4
+           Layout.fillHeight: true
             color: "blue"
 
-            ToolBar
-            {
-                RowLayout{
-                    ToolButton{action:act.start}
-                    ToolButton{action:act.pause}
-                    ToolButton{action:act.stop}
+            Column{
+                anchors.fill: parent
+                ToolBar
+                {
+                    id:tool
+                    RowLayout{
+                        ToolButton{action:act.start}
+                        ToolButton{action:act.pause}
+                        ToolButton{action:act.stop}
+                    }
                 }
+
+                Rectangle{
+                    width: parent.width
+                    height: parent.height
+                    MediaPlayer{
+                        id:_mplay
+                        videoOutput:out
+                        audioOutput:AudioOutput{}
+                        //autoPlay: true
+                    }
+                    VideoOutput{
+                        id:out
+                        anchors.fill:parent
+                    }
+
+                }
+
             }
 
-            MediaPlayer{
-                id:_mplay
-                videoOutput:out
-                audioOutput:AudioOutput{}
-            }
-            VideoOutput{
-                id:out
-                anchors.fill:parent
+            // 格式化时间为 mm:ss
+            function formatTime(milliseconds) {
+                var seconds = milliseconds / 1000;
+                var minutes = Math.floor(seconds / 60);
+                seconds = Math.floor(seconds % 60);
+                return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
             }
 
             // 时间轴 Slider
-            Slider {
-                id: slider
-                anchors.bottom: parent.bottom
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: parent.width - 40 // 留出一些边距
-                from: 0
-                to: _mplay.duration > 0 ? _mplay.duration : 1000 // 默认值为 1000 毫秒（1 秒），避免为 0
-                value: _mplay.position
-                stepSize: 1000 // 步长为 1 秒
+               Slider {
+                   id: slider
+                   anchors.bottom: parent.bottom
+                   anchors.horizontalCenter: parent.horizontalCenter
+                   width: parent.width - 40 // 留出一些边距
+                   from: 0
+                   to: _mplay.duration > 0 ? _mplay.duration : 1000 // 默认值为 1000 毫秒（1 秒），避免为 0
+                   value: _mplay.position
+                   stepSize: 1000 // 步长为 1 秒
 
-                // 当用户拖动 Slider 时，跳转到视频的相应位置
-                onValueChanged: {
-                    if (pressed) { // 仅在用户拖动滑块时更新
-                        console.log("Slider value changed to:", value); // 调试输出
-                        _mplay.position = value; // 使用 position 属性跳转
-                    }
-                }
-            }
+                   // 当用户拖动 Slider 时，跳转到视频的相应位置
+                   onValueChanged: {
+                       if (pressed) { // 仅在用户拖动滑块时更新
+                           console.log("Slider value changed to:", value); // 调试输出
+                           _mplay.position = value; // 使用 position 属性跳转
+                       }
+                   }
+               }
 
-            // 显示当前时间和总时长
-            Row {
-                anchors.bottom: slider.top
-                anchors.horizontalCenter: parent.horizontalCenter
-                spacing: 10
-                Text {
-                    text: Controller.formatTime(_mplay.position)+" / "
-                          +Controller.formatTime(_mplay.duration)
-                    color: "white"
-                }
-            }
+               // 显示当前时间和总时长
+               Row {
+                   anchors.bottom: slider.top
+                   anchors.horizontalCenter: parent.horizontalCenter
+                   spacing: 10
+
+                   Text {
+                       text: formatTime(_mplay.position)
+                       color: "white"
+                   }
+
+                   Text {
+                       text: "/"
+                       color: "white"
+                   }
+
+                   Text {
+                       text: formatTime(_mplay.duration)
+                       color: "white"
+                   }
+               }
+        }
+
+       Rectangle{
+               id:rightRect
+              Layout.preferredWidth: parent.width * 0.4
+              Layout.fillHeight: true
+               color:"black"
+               border.color:"black"
+
+               // 添加一个属性来控制select按钮的可见性
+                 property bool showSelectButton: true
+
+               Player{
+                   id:oneplayer
+               }
+
+               ToolBar
+               {
+                   RowLayout
+                   {
+                      // ToolButton{action:act.a}//open
+                       ToolButton{action:act.aa}//start
+                       ToolButton{action:act.bb}//pause
+                       ToolButton {
+                                      action: act.cc // stop
+                                      // 添加停止按钮点击后的处理
+                                      onClicked: {
+                                          rightRect.showSelectButton = true // 显示select按钮
+                                          // 原有的停止逻辑
+                                          oneplayer.mplay.stop()
+                                      }
+                                  }
+                   }
+               }
+               Button
+               {
+                   id:select
+                   x:50
+                   y:50
+                   height:100
+                   width:100
+                   visible: rightRect.showSelectButton // 绑定可见性到属性
+                   onClicked:
+                   {
+                      dialog.open()
+                   }
+               }
+
+               Dialog {
+                   id: dialog
+                   width: 300
+                   height: 200
+                   modal: true
+                   title: "请选择进行剪辑的视频"
+
+                   Rectangle{
+                      id:popup
+                      // width: (parent.width / 3.8)
+                      // height: parent.height
+                      anchors.fill: parent
+                      color: "green"
+
+                   ListView{
+                       id:videoList2
+                       anchors.fill:parent
+                       spacing:5
+
+                       ScrollBar.vertical: ScrollBar {
+                           policy: ScrollBar.AsNeeded
+                       }
+
+                       model:videoModel
+
+                       delegate:Rectangle{
+                           id:rec2
+                           width:(videoList2.width/2)
+                           height:(videoList2.height / 5)
+                           border.color: "lightblue"
+                           radius: 5 //添加圆角半径
+                           color:{
+                               if (currentPlayingIndex === index) {
+                                   return "lightblue" // 播放状态颜色
+                               } else {
+                                   index % 2 === 0 ? "lightgrey" : "white"
+                               }
+                           }
+
+                           Video{
+                               id:_vvvv2
+                               anchors.fill: parent
+                               source: model.filePath
+                               autoPlay: true
+                               muted: true
+                               loops: MediaPlayer.Infinite
+                               onPlaybackStateChanged: {
+                                   seek(100)
+                                   pause()
+                               }
+                           }
+
+
+                           TapHandler {
+                               onTapped: {
+                                   console.log("Tapped filePath:", model.filePath); // 调试输出
+                                   content.currentPlayingIndex = index
+                                   console.log("now music index & currentPlayingIndex is ",index,content.currentPlayingIndex)
+                                   oneplayer.mplay.source = model.filePath
+                                   inputPath1 = model.filePath.toString().replace("file://", "")
+                                   oneplayer.mplay.play()
+                                   rightRect.showSelectButton = false // 隐藏select按钮
+                                   dialog.close() // 关闭对话框
+                               }
+                           }
+
+                           // 添加颜色过渡动画
+                           Behavior on color {
+                               ColorAnimation { duration: 1500 }
+                           }
+                       }
+
+                       //添加动画
+                       add: Transition {
+                           NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 2000 }
+                       }//透明度动画
+                   }
+               }
+           }
+
+        }
+  //  }
+}
+    VideoCutter {
+        id: cutter
+        onProgressChanged: {
+            progressBar.value = percent
+            progressLabel.text = percent + "%"
+        }
+        onFinished: (success, error) => {
+            console.log("剪切结果:", success, error)
+            resultText.text = success ? "剪切成功!" : "失败: " + error
+            resultText.color = success ? "green" : "red"
+            progressBar.visible = false
         }
     }
 
+    Rectangle{
+        id:bottomRect
+       Layout.fillWidth: true
+       Layout.preferredHeight: parent.height * 0.5 // 下半部分占50%高度
+        color:"pink"
+        border.color:"pink"
+
+    // 时间轴 Slider
+        Slider {
+           id: slider2
+           y:50
+           anchors.centerIn: parent.centerIn
+           width: parent.width - 40 // 留出一些边距
+           from: 0
+           to: oneplayer.mplay.duration > 0 ? oneplayer.mplay.duration : 1000 // 默认值为 1000 毫秒（1 秒），避免为 0
+           value: oneplayer.mplay.position
+           stepSize: 1000 // 步长为 1 秒
+
+           // 当用户拖动 Slider 时，跳转到视频的相应位置
+           onValueChanged: {
+               if (pressed) { // 仅在用户拖动滑块时更新
+                   console.log("Slider value changed to:", value); // 调试输出
+                   oneplayer.mplay.position = value; // 使用 position 属性跳转
+               }
+           }
+       }
+
+       // 显示当前时间和总时长
+       Row {
+           anchors.bottom: slider2.top
+           anchors.horizontalCenter: parent.horizontalCenter
+           spacing: 10
+           Text {
+               text: Controller.formatTime(oneplayer.mplay.position)+" / "
+                     +Controller.formatTime(oneplayer.mplay.duration)
+               color: "white"
+           }
+           // Text {
+           //     text: formatTime(oneplayer.mplay.position)
+           //     color: "white"
+           // }
+           // Text {
+           //     text: "/"
+           //     color: "white"
+           // }
+           // Text {
+           //     text: formatTime(oneplayer.mplay.duration)
+           //     color: "white"
+           // }
+       }
+
+        Column {
+            anchors.centerIn: parent
+            spacing: 20
+
+            Button {
+               id: button1
+               text:qsTr("剪辑开始")
+               visible: currentButton === 1
+               onClicked: {
+                   currentButton = 2
+               }
+            }
+
+            Button {
+               id: button2
+               visible: currentButton === 2
+               text:qsTr("选择该节点作为剪辑的第一个节点")
+             // 格式化时间为秒数
+               function formatTime(milliseconds) {
+                    return Math.floor(milliseconds / 1000); // 返回秒数
+               }
+               onClicked: {
+                    console.log("Current time:", formatTime(oneplayer.mplay.position)); // 打印当前时间
+                    cutter.getStartSec(formatTime(oneplayer.mplay.position));
+                    currentButton = 3
+               }
+            }
+
+            Button {
+               id: button3
+               visible: currentButton === 3
+               text:qsTr("选择该节点作为剪辑的第二个节点")
+
+             // 格式化时间为秒数
+               function formatTime(milliseconds) {
+               return Math.floor(milliseconds / 1000); // 返回秒数
+               }
+
+               onClicked: {
+                    console.log("Current time:", formatTime(oneplayer.mplay.position)); // 打印当前时间
+                    cutter.getEndSec(formatTime(oneplayer.mplay.position));
+                                  currentButton = 4
+               }
+            }
+
+            Button {
+               id: button4
+               text:qsTr("确认")
+               visible: currentButton === 4
+               onClicked: {
+                 //  console.log("test cut path: ",oneplayer.inputPath)
+                  // cutter.cutVideo(oneplayer.inputPath,oneplayer.outputPath,cutter.returnStartSec(), cutter.returnEndSec()-cutter.returnStartSec())
+                   oneplayer.savefile.open()
+                   progressBar.visible = true
+                   progressBar.value = 0
+                   resultText.text = "处理中..."
+                   resultText.color = "blue"
+                   currentButton = 1
+               }
+            }
+            ProgressBar {
+                id: progressBar
+                visible: false
+                width: 200
+                height: 20
+                from: 0
+                to: 100
+                value: 0
+                Label {
+                    id: progressLabel
+                    anchors.centerIn: parent
+                    text: "0%"
+                }
+           }
+
+           Text {
+               id: resultText
+               font.pixelSize: 14
+               width: 300
+           }
+       }
+    }
+}
+
+   // }
+
     Actions{
         id:act
+
+        a.onTriggered:oneplayer.openfile.open()
+        aa.onTriggered: oneplayer.mplay.play()
+        bb.onTriggered: oneplayer.mplay.pause()
+        cc.onTriggered: {
+                oneplayer.mplay.stop()
+                rightRect.showSelectButton = true // 确保停止按钮也显示select按钮
+            }
     }
+
 }
