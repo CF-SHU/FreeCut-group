@@ -22,13 +22,12 @@ Item {
                     _mplay.source = filePath
                     //vvvv.source = filePath
                     const fileName = filePath.toString().split('/').pop().replace(/\.[^/.]+$/, "")
-                    //将路径字符串按斜杠 / 分割成数组,pop得到数组的最后一个字符串，一般是song.mp3,replace正则得到song,即歌名
-                    // 添加到模型
-                    musicModel.append({
+                    //将路径字符串按斜杠
+                    videoModel.append({
                         title: fileName,
                         filePath: filePath,
                     })
-                    console.log("Mp3 path: ",filePath)
+                    console.log("Videos path: ",filePath)
                 }
             }
         }
@@ -42,7 +41,7 @@ Item {
             height: parent.height
             color: "green"
             ListView{
-                id:musicList
+                id:videoList
                 anchors.fill:parent
                 spacing:5
 
@@ -50,13 +49,13 @@ Item {
                     policy: ScrollBar.AsNeeded
                 }
                 model:ListModel{
-                    id:musicModel
+                    id:videoModel
                 }
 
                 delegate:Rectangle{
                     id:rec
-                    width:musicList.width
-                    height:(musicList.height / 5)
+                    width:videoList.width
+                    height:(videoList.height / 5)
                     border.color: "lightblue"
                     radius: 5 //添加圆角半径
                     color:{
@@ -96,8 +95,8 @@ Item {
                         }
                         onDoubleTapped:{
                             if(content.currentPlayingIndex===index){
-                                if (_player.playbackState === MediaPlayer.PlayingState) {
-                                    _player.pause()
+                                if (_mplay.playbackState === MediaPlayer.PlayingState) {
+                                    _mplay.pause()
                                 }
                             }
                         }
@@ -106,27 +105,6 @@ Item {
                     // 添加颜色过渡动画
                     Behavior on color {
                         ColorAnimation { duration: 1500 }
-                    }
-                    // 播放状态图标
-                    Image {
-                        visible: currentPlayingIndex === index && _mplay.playing
-                        source: "playing-icon.png"
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.right: parent.right
-                        anchors.rightMargin: 10
-                        width: 16
-                        height: 16
-                    }
-
-                    // 暂停状态图标
-                    Image {
-                        visible: currentPlayingIndex === index && !_mplay.playing
-                        source: "paused-icon.png"
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.right: parent.right
-                        anchors.rightMargin: 10
-                        width: 16
-                        height: 16
                     }
                 }
 
@@ -141,25 +119,34 @@ Item {
             width: parent.width - left.width
             height: parent.height
             color: "blue"
-
-            ToolBar
-            {
-                RowLayout{
-                    ToolButton{action:act.start}
-                    ToolButton{action:act.pause}
-                    ToolButton{action:act.stop}
+            Column{
+                anchors.fill: parent
+                ToolBar
+                {
+                    id:tool
+                    RowLayout{
+                        ToolButton{action:act.start}
+                        ToolButton{action:act.pause}
+                        ToolButton{action:act.stop}
+                    }
                 }
-            }
 
-            MediaPlayer{
-                id:_mplay
-                videoOutput:out
-                audioOutput:AudioOutput{}
-                //autoPlay: true
-            }
-            VideoOutput{
-                id:out
-                anchors.fill:parent
+                Rectangle{
+                    width: parent.width
+                    height: parent.height
+                    MediaPlayer{
+                        id:_mplay
+                        videoOutput:out
+                        audioOutput:AudioOutput{}
+                        //autoPlay: true
+                    }
+                    VideoOutput{
+                        id:out
+                        anchors.fill:parent
+                    }
+
+                }
+
             }
 
             // 格式化时间为 mm:ss

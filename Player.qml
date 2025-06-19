@@ -13,17 +13,17 @@ Item {
     property string inputPath: ""
     property string outputPath: ""
 
-    Button{
-        id:_play
-        y:100
-        width:200
-        height:200
-        text:qsTr("点我播放")
-        onClicked:{
-            _mplay.play()
-            visible = false
-        }
-    }
+    // Button{
+    //     id:_play
+    //     y:100
+    //     width:200
+    //     height:200
+    //     text:qsTr("点我播放")
+    //     onClicked:{
+    //         _mplay.play()
+    //         visible = false
+    //     }
+    // }
     FileDialog{
         id:_openfile
         title: "Select some videos"
@@ -32,11 +32,12 @@ Item {
         fileMode: FileDialog.OpenFiles
         nameFilters:["Video files(* .mp4,* .flv,* .mkv)"]
         onAccepted: {
-            inputPath = selectedFile.toString().replace("file://", "")
+            //inputPath = selectedFile.toString().replace("file://", "")
             outputPath = "/root/output.mp4"
             //去除openfile.selectedFile的路径中的"file://"
-            console.log("openfile path: ",inputPath)
-            _mplay.source = inputPath
+            //console.log("openfile path: ",inputPath)
+            _mplay.source = selectedFile
+            inputPath = selectedFile.toString().replace("file://", "")
         }
     }
     FileDialog{
@@ -57,12 +58,12 @@ Item {
         audioOutput:AudioOutput{}
         onPositionChanged: {
             if (!slider.pressed) { // 仅在用户未拖动滑块时更新
-                slider.value = position;
-                console.log("Current position:", formatTime(position)); // 实时打印当前时间
+                slider.value = _mplay.position;
+                console.log("Current position:", formatTime(_mplay.position)); // 实时打印当前时间
             }
         }
         onDurationChanged: {
-            console.log("Video duration:", formatTime(duration)); // 调试输出视频时长
+            console.log("Video duration:", formatTime(_mplay.duration)); // 调试输出视频时长
         }
 
     }

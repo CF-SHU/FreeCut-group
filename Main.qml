@@ -203,8 +203,8 @@ ApplicationWindow {
                    text:qsTr("确认")
                    visible: currentButton === 4
                    onClicked: {
-                       console.log("test cut path: ",dialogs.inputPath)
-                       cutter.cutVideo(dialogs.inputPath,dialogs.outputPath,cutter.returnStartSec(), cutter.returnEndSec()-cutter.returnStartSec())
+                       console.log("test cut path: ",oneplayer.inputPath)
+                       cutter.cutVideo(oneplayer.inputPath,oneplayer.outputPath,cutter.returnStartSec(), cutter.returnEndSec()-cutter.returnStartSec())
                        progressBar.visible = true
                        progressBar.value = 0
                        resultText.text = "处理中..."
@@ -240,6 +240,9 @@ ApplicationWindow {
         open.onTriggered:content.dialog.openfile.open()
         about.onTriggered: dialogs.about.open()
         a.onTriggered:oneplayer.openfile.open()
+        aa.onTriggered: oneplayer.mplay.play()
+        bb.onTriggered: oneplayer.mplay.pause()
+        cc.onTriggered: oneplayer.mplay.stop()
     }
     Dialogs{
         id:dialogs

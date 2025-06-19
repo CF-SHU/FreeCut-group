@@ -1,5 +1,6 @@
 import QtQuick
 import QtQuick.Controls
+import QtMultimedia
 
 Item {
     property alias open: _open
@@ -74,41 +75,23 @@ Item {
         id:_a
         text:qsTr("&open...")
         icon.name:"media-playback-start"
-        onTriggered:{
-            oneplayer.mplay.play()
-        }
     }
     Action
     {
         id:_cc
         text:qsTr("&Stop...")
         icon.name:"media-playback-stop"
-        onTriggered:{
-            oneplayer.mplay.stop()
-        }
     }
     Action
     {
         id:_bb
         text:qsTr("&Pause...")
         icon.name:"media-playback-pause"
-        onTriggered:{
-            oneplayer.mplay.pause()
-            if (oneplayer.mplay.playbackState === MediaPlayer.PlayingState) {
-                            oneplayer.mplay.pause();
-                            console.log("Paused at:", formatTime(oneplayer.mplay.position)); // 暂停时打印当前时间
-                        } else {
-                            oneplayer.mplay.play();
-                        }
-        }
     }
     Action
     {
         id:_aa
         text:qsTr("&start...")
         icon.name:"media-playback-start"
-        onTriggered:{
-            oneplayer.mplay.play()
-        }
     }
 }
