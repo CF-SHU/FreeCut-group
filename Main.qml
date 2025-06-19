@@ -2,7 +2,7 @@ import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
 import Videoclips 1.0
-
+import "control.js" as Controll
 import QtQuick.Dialogs
 import QtCore
 import QtMultimedia
@@ -17,38 +17,30 @@ ApplicationWindow {
     // 定义按钮的初始状态
     property int currentButton: 1 // 1: 第一个按钮可见
 
-    // 格式化时间为 mm:ss
-    function formatTime(milliseconds) {
-        var seconds = milliseconds / 1000;
-        var minutes = Math.floor(seconds / 60);
-        seconds = Math.floor(seconds % 60);
-        return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-    }
-
     ColumnLayout{
         anchors.fill:parent
         spacing:0
             RowLayout{
                 MenuBar {
-                    Menu {
-                        title: qsTr("File")
-                        MenuItem { action: actions.open }
-                        MenuItem { action: actions.save }
-                        MenuItem { action: actions.quit }
-                    }
-                    Menu {
-                        title: qsTr("Help")
-                        MenuItem { action: actions.about }
-                    }
+                   Menu {
+                       title: qsTr("File")
+                       MenuItem { action: actions.open }
+                       MenuItem { action: actions.save }
+                       MenuItem { action: actions.quit }
+                   }
+                   Menu {
+                       title: qsTr("Help")
+                       MenuItem { action: actions.about }
+                   }
                 }
             }
             RowLayout{
                 ToolBar {
-                    RowLayout{
-                        ToolButton{ action: actions.open }
-                        ToolButton{ action: actions.save }
-                        ToolButton{ action: actions.quit }
-                    }
+                   RowLayout{
+                       ToolButton{ action: actions.open }
+                       ToolButton{ action: actions.save }
+                       ToolButton{ action: actions.quit }
+                   }
                 }
             }
         Rectangle{
@@ -140,15 +132,8 @@ ApplicationWindow {
                anchors.horizontalCenter: parent.horizontalCenter
                spacing: 10
                Text {
-                   text: formatTime(oneplayer.mplay.position)
-                   color: "white"
-               }
-               Text {
-                   text: "/"
-                   color: "white"
-               }
-               Text {
-                   text: formatTime(oneplayer.mplay.duration)
+                   text: Controller.formatTime(_mplay.position)+" / "
+                         +Controller.formatTime(_mplay.duration)
                    color: "white"
                }
            }
@@ -170,14 +155,14 @@ ApplicationWindow {
                    id: button2
                    visible: currentButton === 2
                    text:qsTr("选择该节点作为剪辑的第一个节点")
-                 // 格式化时间为秒数
+                   // 格式化时间为秒数
                    function formatTime(milliseconds) {
                         return Math.floor(milliseconds / 1000); // 返回秒数
                    }
                    onClicked: {
-                        console.log("Current time:", formatTime(oneplayer.mplay.position)); // 打印当前时间
-                                      cutter.getStartSec(formatTime(oneplayer.mplay.position));
-                        currentButton = 3
+                       console.log("Current time:", formatTime(oneplayer.mplay.position)); // 打印当前时间
+                       cutter.getStartSec(formatTime(oneplayer.mplay.position));
+                       currentButton = 3
                    }
                 }
 
@@ -186,9 +171,9 @@ ApplicationWindow {
                    visible: currentButton === 3
                    text:qsTr("选择该节点作为剪辑的第二个节点")
 
-                 // 格式化时间为秒数
+                   // 格式化时间为秒数
                    function formatTime(milliseconds) {
-                   return Math.floor(milliseconds / 1000); // 返回秒数
+                       return Math.floor(milliseconds / 1000); // 返回秒数
                    }
 
                    onClicked: {
@@ -203,8 +188,7 @@ ApplicationWindow {
                    text:qsTr("确认")
                    visible: currentButton === 4
                    onClicked: {
-                       console.log("test cut path: ",dialogs.inputPath)
-                       cutter.cutVideo(dialogs.inputPath,dialogs.outputPath,cutter.returnStartSec(), cutter.returnEndSec()-cutter.returnStartSec())
+                       oneplayer.savefile.open()
                        progressBar.visible = true
                        progressBar.value = 0
                        resultText.text = "处理中..."
@@ -237,9 +221,12 @@ ApplicationWindow {
     }
     Actions{
         id:actions
-        open.onTriggered:content.dialog.openfile.open()
-        about.onTriggered: dialogs.about.open()
-        a.onTriggered:oneplayer.openfile.open()
+        open.onTriggered:content.fileopen.openfile.open()
+        about.onTriggered: oneplayer.about.open()
+        a.onTriggered: oneplayer.openfile.open()
+        aa.onTriggered: oneplayer.mplay.play()
+        bb.onTriggered: oneplayer.mplay.pause()
+        cc.onTriggered: oneplayer.mplay.stop()
     }
     Dialogs{
         id:dialogs
