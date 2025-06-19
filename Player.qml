@@ -10,10 +10,18 @@ Item {
     anchors.fill: parent
     property alias openfile:_openfile
     property alias savefile: _savefile
+    property alias openmusic:_openmusic
+    property alias musicplay:_musicplay
+    property alias savevideofile:_savevideofile
     property alias about: _about
     property alias mplay:_mplay
     property string inputPath: ""
     property string outputPath: ""
+    property string audioOutputPath: ""
+
+    VideoMusic{
+        id:vimu
+    }
 
     FileDialog{
         id:_openfile
@@ -46,6 +54,39 @@ Item {
 
     }
 
+    FileDialog{
+        id:_savevideofile
+        title: "Save your cut video"
+        currentFolder:StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+        fileMode:FileDialog.SaveFile
+        nameFilters:[ "Audio files (*.mp4 *.wav)" ]
+        onAccepted: {
+            outputPath = selectedFile.toString().replace("file://", "")
+            //outputPath = "/root/实训/out.mp4"
+            //outputPath = "/root/out.mp4"
+            //console.log("输出文件路径:", path)
+                vimu.replaceAudio(content.inputPath1,audioOutputPath,outputPath)
+                //result.text = success ? "成功！" : "失败！"
+                console.log(content.inputPath1)
+                console.log(audioOutputPath)
+                console.log(outputPath)
+
+        }
+    }
+
+    FileDialog{
+        id:_openmusic
+        title: "Select some musics"
+        currentFolder: StandardPaths.standardLocations
+                       (StandardPaths.DocumentsLocation)[0]
+        fileMode: FileDialog.OpenFiles
+        nameFilters:["Video files(* .mp3,* .wav,* .mp4,* .flv,* .mkv)"]
+        onAccepted: {
+            _musicplay.source = _openmusic.selectedFile
+            audioOutputPath = selectedFile.toString().replace("file://", "")
+        }
+    }
+
     MediaPlayer{
         id:_mplay
         videoOutput:out
@@ -59,11 +100,25 @@ Item {
         onDurationChanged: {
             console.log("Video duration:", Controller.formatTime(_mplay.duration)); // 调试输出视频时长
         }
+        onPlayingChanged: {
+            if(_mplay.playing === true){
+                _musicplay.play()
+                _musicplay.position = _mplay.position
+            }else{
+                _musicplay.pause()
+            }
+        }
     }
 
     VideoOutput{
         id:out
         anchors.fill:parent
+    }
+
+    MediaPlayer{
+        id:_musicplay
+        audioOutput: AudioOutput{}
+        source:" "
     }
 
     // 时间轴 Slider

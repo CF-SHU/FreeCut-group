@@ -25,6 +25,8 @@ qt_add_qml_module(appVideoclips
     QML_FILES Contents.qml
     SOURCES videocutter.h videocutter.cpp
     QML_FILES control.js
+    SOURCES videomusic.h videomusic.cpp
+    QML_FILES Notification.qml
 )
 
 target_compile_features(appVideoclips PRIVATE cxx_std_23)

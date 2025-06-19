@@ -72,13 +72,13 @@ ColumnLayout{
 
     RowLayout{
         anchors.fill: parent
-        height: parent.height * 0.5
+        height: parent.height -bottomRect.height
         spacing: 0 // 移除间距
 
         Rectangle{
             id:left
-           Layout.preferredWidth: parent.width * 0.2
-           Layout.fillHeight: true
+           Layout.preferredWidth: parent.width * 0.15
+           Layout.preferredHeight: parent.height - bottomRect.height
             color: "green"
 
             ListView{
@@ -149,8 +149,8 @@ ColumnLayout{
         Rectangle{
             id:mid
 
-           Layout.preferredWidth: parent.width * 0.4
-           Layout.fillHeight: true
+           Layout.preferredWidth: parent.width * 0.35
+           Layout.preferredHeight: left.height
             color: "blue"
 
             Column{
@@ -236,8 +236,8 @@ ColumnLayout{
 
        Rectangle{
                id:rightRect
-              Layout.preferredWidth: parent.width * 0.4
-              Layout.fillHeight: true
+              Layout.preferredWidth: parent.width * 0.5
+              Layout.preferredHeight: left.height
                color:"black"
                border.color:"black"
 
@@ -509,6 +509,41 @@ ColumnLayout{
                width: 300
            }
        }
+        Button{
+            id:cutaudio
+            text:"关闭原声"
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            onClicked: {
+                oneplayer.mplay.audioOutput.muted = true
+                noti.notification.show("已关闭原声")
+            }
+        }
+        Button{
+           id:openaudio
+           anchors.top:cutaudio.bottom
+           text:"打开原声"
+           onClicked: {
+               oneplayer.mplay.audioOutput.muted = false
+               noti.notification.show("已打开原声")
+           }
+        }
+        Button{
+            id:music
+            anchors.bottom: cutaudio.top
+            text:"插入音频"
+            onClicked: {
+               oneplayer.openmusic.open()
+            }
+        }
+        Button{
+           id:ouput
+           anchors.top: openaudio.bottom
+           text:"导出视频"
+           onClicked: {
+               oneplayer.savevideofile.open()
+           }
+        }
     }
 }
 
@@ -524,6 +559,11 @@ ColumnLayout{
                 oneplayer.mplay.stop()
                 rightRect.showSelectButton = true // 确保停止按钮也显示select按钮
             }
+    }
+    Notification{
+        id:noti
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
     }
 
 }
