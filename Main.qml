@@ -46,12 +46,11 @@ ApplicationWindow {
             Layout.fillWidth: true
             Layout.fillHeight: true
 
-           Contents{
-               id:content
-               anchors.fill: parent
-           }
+            Contents{
+                id:content
+                anchors.fill: parent
+            }
         }
-
     }
     Actions{
         id:actions

@@ -12,3 +12,16 @@ function formatTime(milliseconds) {
     seconds = Math.floor(seconds % 60);
     return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
 }
+
+//区分添加的素材是音频还是视频
+function detectMediaType(path) {
+        var splitPath = path.toString().split('.').pop().toLowerCase();
+
+        var videoExts = ["mp4", "mov", "avi", "mkv"]; // 视频类型
+        var audioExts = ["mp3", "wav", "flac", "ogg"]; // 音频类型
+
+        if (videoExts.includes(splitPath)) return "video";
+        if (audioExts.includes(splitPath)) return "audio";
+
+        return "other";
+}

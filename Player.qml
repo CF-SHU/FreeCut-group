@@ -15,8 +15,9 @@ Item {
     property alias savevideofile:_savevideofile
     property alias about: _about
     property alias mplay:_mplay
+    property alias mSlider:_slider // 预览窗口时间轴 Slider
     property string inputPath: ""
-    property string outputPath: ""
+    property string outputPath: "/root/output.mp4"
     property string audioOutputPath: ""
 
     VideoMusic{
@@ -29,58 +30,56 @@ Item {
         currentFolder: StandardPaths.standardLocations
                        (StandardPaths.DocumentsLocation)[0]
         fileMode: FileDialog.OpenFiles
-        nameFilters:["Video files(* .mp4,* .flv,* .mkv)"]
+        nameFilters:["Video files (*.mp4 *.mov *.avi *.mkv *.mp3 *.wav *.flac *.ogg)"]
         onAccepted: {
             _mplay.source = selectedFile
             inputPath = selectedFile.toString().replace("file://", "")
-             console.log("输出文件路径:", inputPath)
+            console.log("输出文件路径:", inputPath)
             //去除openfile.selectedFile的路径中的"file://"
         }
     }
 
+    //保存剪切的视频
     FileDialog{
         id:_savefile
         title: "Save your cut video"
         currentFolder:StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
         fileMode:FileDialog.SaveFile
-        nameFilters:[ "Audio files (*.mp4 *.oop *.avi *.wav)" ]
+        nameFilters:[ "Audio files (*.mp4 *.mov *.avi *.mkv *.mp3 *.wav *.flac *.ogg)" ]
         onAccepted: {
             //默认输出路径
-            outputPath = "/root/output.mp4"
             outputPath = selectedFile.toString().replace("file://", "")
             console.log("输出文件路径:", outputPath)
             Controller.processCut();
         }
-
     }
 
+    //保存合并的视频
     FileDialog{
         id:_savevideofile
         title: "Save your cut video"
         currentFolder:StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
         fileMode:FileDialog.SaveFile
-        nameFilters:[ "Audio files (*.mp4 *.wav)" ]
+        nameFilters:[ "Audio files (*.mp4 *.mov *.avi *.mkv *.wav)" ]
         onAccepted: {
             outputPath = selectedFile.toString().replace("file://", "")
-            //outputPath = "/root/实训/out.mp4"
-            //outputPath = "/root/out.mp4"
             //console.log("输出文件路径:", path)
-                vimu.replaceAudio(content.inputPath1,audioOutputPath,outputPath)
-                //result.text = success ? "成功！" : "失败！"
-                console.log(content.inputPath1)
-                console.log(audioOutputPath)
-                console.log(outputPath)
-
+            vimu.replaceAudio(content.inputPath1,audioOutputPath,outputPath)
+            //result.text = success ? "成功！" : "失败！"
+            console.log(content.inputPath1)
+            console.log(audioOutputPath)
+            console.log(outputPath)
         }
     }
 
+    //打开音乐按钮
     FileDialog{
         id:_openmusic
         title: "Select some musics"
         currentFolder: StandardPaths.standardLocations
                        (StandardPaths.DocumentsLocation)[0]
         fileMode: FileDialog.OpenFiles
-        nameFilters:["Video files(* .mp3,* .wav,* .mp4,* .flv,* .mkv)"]
+        nameFilters:["Video files(*.mp3 *.wav *.flac *.ogg)"]
         onAccepted: {
             _musicplay.source = _openmusic.selectedFile
             audioOutputPath = selectedFile.toString().replace("file://", "")
@@ -94,7 +93,6 @@ Item {
         onPositionChanged: {
             if (!slider.pressed) { // 仅在用户未拖动滑块时更新
                 slider.value = _mplay.position;
-                //console.log("Current position:", formatTime(_mplay.position)); // 实时打印当前时间
             }
         }
         onDurationChanged: {
@@ -121,9 +119,9 @@ Item {
         source:" "
     }
 
-    // 时间轴 Slider
+    // 预览窗口时间轴 Slider
     Slider{
-        id: slider
+        id: _slider
         anchors.bottom: parent.bottom
         anchors.horizontalCenter: parent.horizontalCenter
         width: parent.width - 40 // 留出一些边距
@@ -140,14 +138,14 @@ Item {
         }
     }
 
-    // 显示当前时间和总时长
+    // 显示预览窗口当前时间和总时长
     Row {
-        anchors.bottom: slider.top
+        anchors.bottom: _slider.top
         anchors.horizontalCenter: parent.horizontalCenter
         spacing: 10
         Text {
-            text: Controller.formatTime(_mplay.position)+" / "
-                  +Controller.formatTime(_mplay.duration)
+            text: Controller.formatTime(oneplayer.mplay.position)+" / "
+                  +Controller.formatTime(oneplayer.mplay.duration)
             color: "white"
         }
     }

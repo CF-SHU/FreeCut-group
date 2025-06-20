@@ -11,6 +11,7 @@ class VideoCutter : public QObject
 public:
     explicit VideoCutter(QObject *parent = nullptr);
     Q_INVOKABLE void cutVideo(const QString &inputPath, const QString &outputPath, qint64 startSec, qint64 durationSec);
+    Q_INVOKABLE void previewCut(const QString &inputPath, qint64 startSec, qint64 endSec);
     Q_INVOKABLE void getStartSec(qint64 startSec);
     Q_INVOKABLE void getEndSec(qint64 endSec);
     Q_INVOKABLE qint64 returnStartSec();
