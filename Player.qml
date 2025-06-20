@@ -18,6 +18,7 @@ Item {
     property string inputPath: ""
     property string outputPath: ""
     property string audioOutputPath: ""
+   // property alias fixedsave:_fixedsave
 
     VideoMusic{
         id:vimu
@@ -46,13 +47,57 @@ Item {
         nameFilters:[ "Audio files (*.mp4 *.oop *.avi *.wav)" ]
         onAccepted: {
             //默认输出路径
-            outputPath = "/root/output.mp4"
+            //outputPath = "/root/output.mp4"
             outputPath = selectedFile.toString().replace("file://", "")
             console.log("输出文件路径:", outputPath)
-            Controller.processCut();
+
+            //保存文件的函数
+        //   console.log("输入文件路径:",)
+            Controller.savefile()
+
+           // Controller.processCut();
         }
 
     }
+
+ //    FileDialog{
+ //        id:_fixedsave
+ //        title: "Save your cut video"
+ //        currentFolder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/wawawawawa" // 固定目录
+ //        fileMode:FileDialog.SaveFile
+ //        nameFilters:[ "Audio files (*.mp4 *.oop *.avi *.wav)" ]
+ //        onAccepted: {
+ //            //默认输出路径
+
+ //            // 确保目录存在（如果不存在则创建）
+ //            var fixedFolder = StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/wawawawawa";
+ //            var directory = Qt.createQmlObject('import QtQuick 2.0; Item {}', parent);
+ //            var folder = Qt.resolvedUrl(fixedFolder);
+ //            var file = new XMLHttpRequest();
+ //            file.open("HEAD", folder, false);
+ //            file.send();
+
+ //            if (file.status !== 200) {
+ //                // 创建目录（简单示例，实际可能需要更健壮的实现）
+ //                var createFolderCommand = "mkdir -p \"" + fixedFolder + "\"";
+ //                Qt.callLater(function() {
+ //                    Qt.openUrlExternally("sh", "-c " + createFolderCommand);
+ //                });
+ //            }
+
+ //            // 固定输出路径
+ //            outputPath = fixedFolder + "/output.mp4"; // 固定文件名
+ //            console.log("输出文件路径:", outputPath);
+
+ //            // 模拟保存操作（实际可能需要调用 C++ 函数）
+ //            // 这里假设保存成功，直接更新播放器源
+ //            oneplayer.mplay.source = outputPath;
+ //            oneplayer.mplay.play();
+
+ //            console.log("输出文件路径:", outputPath)
+ //        }
+
+ //    }
 
     FileDialog{
         id:_savevideofile

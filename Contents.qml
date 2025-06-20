@@ -183,13 +183,13 @@ ColumnLayout{
 
             }
 
-            // 格式化时间为 mm:ss
-            function formatTime(milliseconds) {
-                var seconds = milliseconds / 1000;
-                var minutes = Math.floor(seconds / 60);
-                seconds = Math.floor(seconds % 60);
-                return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-            }
+            // // 格式化时间为 mm:ss
+            // function formatTime(milliseconds) {
+            //     var seconds = milliseconds / 1000;
+            //     var minutes = Math.floor(seconds / 60);
+            //     seconds = Math.floor(seconds % 60);
+            //     return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+            // }
 
             // 时间轴 Slider
                Slider {
@@ -218,7 +218,7 @@ ColumnLayout{
                    spacing: 10
 
                    Text {
-                       text: formatTime(_mplay.position)
+                       text: Controller.formatTime(_mplay.position)
                        color: "white"
                    }
 
@@ -228,7 +228,7 @@ ColumnLayout{
                    }
 
                    Text {
-                       text: formatTime(_mplay.duration)
+                       text: Controller.formatTime(_mplay.duration)
                        color: "white"
                    }
                }
@@ -414,18 +414,7 @@ ColumnLayout{
                      +Controller.formatTime(oneplayer.mplay.duration)
                color: "white"
            }
-           // Text {
-           //     text: formatTime(oneplayer.mplay.position)
-           //     color: "white"
-           // }
-           // Text {
-           //     text: "/"
-           //     color: "white"
-           // }
-           // Text {
-           //     text: formatTime(oneplayer.mplay.duration)
-           //     color: "white"
-           // }
+
        }
 
         Column {
@@ -479,15 +468,33 @@ ColumnLayout{
                visible: currentButton === 4
                onClicked: {
                  //  console.log("test cut path: ",oneplayer.inputPath)
-                  // cutter.cutVideo(oneplayer.inputPath,oneplayer.outputPath,cutter.returnStartSec(), cutter.returnEndSec()-cutter.returnStartSec())
-                   oneplayer.savefile.open()
-                   progressBar.visible = true
-                   progressBar.value = 0
-                   resultText.text = "处理中..."
-                   resultText.color = "blue"
+
+
+                   //选择指定路径保存
+                   // oneplayer.savefile.open()
+                   // progressBar.visible = true
+                   // progressBar.value = 0
+                   // resultText.text = "处理中..."
+                   // resultText.color = "blue"
+
+                   //  //保存到固定的的目录
+                   //  var filepath= model.filePath
+
+                   //保存到固定的的目录
+                   var outputPath="/root/wawawawawa/ccc.mp4"
+                   Controller.processCut(inputPath1,outputPath)
+                  // cutter.cutVideo(oneplayer.mplay.inputPath,outputPath,cutter.returnStartSec(), cutter.returnEndSec()-cutter.returnStartSec())
+
+                   //将视频路径给oneplayer播放器
+                   oneplayer.mplay.stop()//结束上一个视频的播放
+                   oneplayer.mplay.source = "file:///root/wawawawawa/ccc.mp4"
+                   oneplayer.mplay.play()
+
                    currentButton = 1
                }
             }
+
+
             ProgressBar {
                 id: progressBar
                 visible: false
@@ -509,6 +516,9 @@ ColumnLayout{
                width: 300
            }
        }
+
+
+
         Button{
             id:cutaudio
             text:"关闭原声"
@@ -542,6 +552,24 @@ ColumnLayout{
            text:"导出视频"
            onClicked: {
                oneplayer.savevideofile.open()
+           }
+        }
+        Button{
+           id:savefileto
+           anchors.top: openaudio.bottom
+           text:"保存剪辑好的视频"
+           onClicked: {
+
+               //选择指定路径保存
+               oneplayer.savefile.open()
+               progressBar.visible = true
+               progressBar.value = 0
+               resultText.text = "处理中..."
+               resultText.color = "blue"
+
+               //删除前面产生的临时视频文件
+
+               //Controller.deletedir("/root/wawawawawa")
            }
         }
     }

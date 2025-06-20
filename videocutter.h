@@ -15,6 +15,9 @@ public:
     Q_INVOKABLE void getEndSec(qint64 endSec);
     Q_INVOKABLE qint64 returnStartSec();
     Q_INVOKABLE qint64 returnEndSec();
+    Q_INVOKABLE bool deletedir(const QString &dirpath);
+    Q_INVOKABLE bool savefile(const QString &inputPath, const QString &outputPath);
+    Q_INVOKABLE bool movefile(const QString &sourcePath, const QString &destinationDir);
 
 signals:
     void progressChanged(int percent);                 // 进度更新信号
