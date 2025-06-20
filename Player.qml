@@ -13,6 +13,7 @@ Item {
     property alias openmusic:_openmusic
     property alias musicplay:_musicplay
     property alias savevideofile:_savevideofile
+    property alias savemergerfile:_savemergerfile
     property alias about: _about
     property alias mplay:_mplay
     property string inputPath: ""
@@ -24,6 +25,9 @@ Item {
         id:vimu
     }
 
+    VideoSegmentMerger{
+        id:vi
+    }
     FileDialog{
         id:_openfile
         title: "Select some videos"
@@ -132,6 +136,20 @@ Item {
         }
     }
 
+    FileDialog{
+        id:_savemergerfile
+        title: "Save your merger video"
+        currentFolder:StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+        fileMode:FileDialog.SaveFile
+        nameFilters:[ "Audio files (*.mp4 *.oop *.avi *.wav)" ]
+        onAccepted: {
+            //outputPath = "/root/output.mp4"
+            outputPath = selectedFile.toString().replace("file://", "")
+            console.log("输出文件路径:", outputPath)
+            vi.mergeTwoSegments(content.videoCPath[0],content.fromTimes[0],content.toTimes[0],content.videoCPath[1],content.fromTimes[1],content.toTimes[1],outputPath)
+        }
+
+    }
     MediaPlayer{
         id:_mplay
         videoOutput:out

@@ -13,31 +13,11 @@ Item {
     property int currentPlayingIndex: -1
     property alias mplay:_mplay
     property string inputPath1: ""
-
-    Player{
-        id:_fileopen
-        openfile{
-            onRejected:{
-                return;
-            }
-            onAccepted: {
-                let selectfilePath = openfile.selectedFiles;
-                for(let i = 0; i < selectfilePath.length; ++i){
-                    const filePath = selectfilePath[i]
-                    _mplay.source = filePath
-                    const fileName = filePath.toString().split('/').pop().replace(/\.[^/.]+$/, "")
-                    //将路径字符串按斜杠 / 分割成数组,pop得到数组的最后一个字符串，一般是song.mp3,replace正则得到song,即歌名
-                    // 添加到模型
-                    musicModel.append({
-                        title: fileName,
-                        filePath: filePath,
-                    })
-                    console.log("Mp3 path: ",filePath)
-                }
-            }
-        }
-    }
-
+    property var videoCPath: [" ", " ", " "," "," "]
+    property var videoQPath: [" ", " ", " "," "," "]
+    property int a: 0
+    property var fromTimes:[0,0,0,0,0]
+    property var toTimes:[0,0,0,0,0]
     ListModel{
         id:videoModel
     }
@@ -68,7 +48,7 @@ Item {
 
 ColumnLayout{
    anchors.fill: parent
-   spacing: 10 // 移除间距使布局更紧凑
+   spacing: 0 // 移除间距使布局更紧凑
 
     RowLayout{
         anchors.fill: parent
@@ -572,6 +552,135 @@ ColumnLayout{
                //Controller.deletedir("/root/wawawawawa")
            }
         }
+        Button{
+          id:mer1
+          text:"选择要合并的视频"
+          z:2
+          anchors.top: ouput.bottom
+          onClicked: {
+            dialog2.open()
+            mer2.z = 2
+          }
+        }
+
+        Button {
+           id: mer2
+           z:1
+           text:qsTr("选择第一个节点")
+           anchors.top: mer1.top
+           onClicked: {
+               z = 1
+               mer3.z = 2
+               fromTimes[a] = oneplayer.mplay.position
+               console.log("时间点1:",fromTimes[a])
+           }
+        }
+
+        Button {
+           id: mer3
+           text:qsTr("选择第二个节点")
+           anchors.top: mer1.top
+           onClicked: {
+               z=0
+              toTimes[a] = oneplayer.mplay.position
+              console.log("时间点2:",toTimes[a])
+             a++
+           }
+        }
+
+        Button{
+          id:mer4
+          text:"预览剪辑好的视频"
+          anchors.top: mer1.bottom
+          onClicked: {
+            oneplayer.savemergerfile.open()
+          }
+        }
+
+        Dialog{
+          id: dialog2
+          width: 300
+          height: 200
+          modal: true
+          title: "请选择进行剪辑的视频"
+
+          Rectangle{
+             id:popup2
+             // width: (parent.width / 3.8)
+             // height: parent.height
+             anchors.fill: parent
+             color: "green"
+
+          ListView{
+              id:videoList3
+              anchors.fill:parent
+              spacing:5
+
+              ScrollBar.vertical: ScrollBar {
+                  policy: ScrollBar.AsNeeded
+              }
+
+              model:videoModel
+
+              delegate:Rectangle{
+                  id:rec3
+                  width:(videoList2.width)
+                  height:(videoList2.height / 2)
+                  border.color: "lightblue"
+                  radius: 5 //添加圆角半径
+                  color:{
+                      if (currentPlayingIndex === index) {
+                          return "lightblue" // 播放状态颜色
+                      } else {
+                          index % 2 === 0 ? "lightgrey" : "white"
+                      }
+                  }
+
+                  Video{
+                      id:_vvvv3
+                      //anchors.fill: parent
+                      anchors.left: parent.left
+                      width: parent.width/2
+                      height: parent.height
+                      source: model.filePath
+                      autoPlay: true
+                      muted: true
+                      loops: MediaPlayer.Infinite
+                      onPlaybackStateChanged: {
+                          seek(100)
+                          pause()
+                      }
+                  }
+
+                  TapHandler {
+                      onTapped: {
+                          console.log("Tapped filePath:", model.filePath); // 调试输出
+                          content.currentPlayingIndex = index
+                          console.log("now music index & currentPlayingIndex is ",index,content.currentPlayingIndex)
+                          oneplayer.mplay.source = model.filePath
+                          videoCPath[a] = model.filePath.toString().replace("file://", "")
+                          videoQPath[a] = model.filePath
+                          console.log(a,videoQPath[a])
+                          oneplayer.mplay.play()
+                          rightRect.showSelectButton = false
+                          dialog2.close() // 关闭对话框
+                      }
+                  }
+
+                  // 添加颜色过渡动画
+                  Behavior on color {
+                      ColorAnimation { duration: 1500 }
+                  }
+              }
+
+              //添加动画
+              add: Transition {
+                  NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 2000 }
+              }//透明度动画
+          }
+      }
+    }
+
     }
 }
 
