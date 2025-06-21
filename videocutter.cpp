@@ -8,12 +8,22 @@
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QDateTime>
-//#include <QFile>
+#include <qdir.h>
+#include <cstdio>
+#include <iostream>
 
 VideoCutter::VideoCutter(QObject *parent) : QObject(parent), m_process(nullptr) {}
 
 void VideoCutter::cutVideo(const QString &inputPath, const QString &outputPath, qint64 startSec, qint64 durationSec)
 {
+    // 确保输出目录存在
+    QDir outputDir = QFileInfo(outputPath).dir();
+    if (!outputDir.exists()) {
+        if (!outputDir.mkpath(".")) {
+            qDebug() << "Failed to create output directory:" << outputDir.path();
+        }
+    }
+
     if (m_process) {
         m_process->kill();
         m_process->deleteLater();
@@ -23,10 +33,8 @@ void VideoCutter::cutVideo(const QString &inputPath, const QString &outputPath, 
     m_process = new QProcess(this);
     m_durationSec = durationSec;
 
-    // 用户可写目录
-    //QString OutputPath = outputPath;
-    //OutputPath = QStandardPaths::writableLocation(QStandardPaths::MoviesLocation) + "/output.mp4";
-    //qDebug() << "自定义输出路径:" << OutputPath;
+    qDebug() << "input : " << inputPath;
+    qDebug() << "自定义输出路径:" << outputPath;
 
     QStringList args = {"-y",
                         "-ss",
@@ -45,14 +53,14 @@ void VideoCutter::cutVideo(const QString &inputPath, const QString &outputPath, 
     connect(m_process, &QProcess::readyReadStandardOutput, this, &VideoCutter::handleProcessOutput);
 
     // 添加错误处理
-    connect(m_process, &QProcess::errorOccurred, this, [=](QProcess::ProcessError error) {
+    connect(m_process, &QProcess::errorOccurred, this, [=, this](QProcess::ProcessError error) {
         QString errorMsg = QString("进程错误[%1]: %2").arg(error).arg(m_process->errorString());
         qWarning() << errorMsg;
         emit finished(false, errorMsg);
     });
 
     // 捕获标准错误输出
-    connect(m_process, &QProcess::readyReadStandardError, this, [=]() {
+    connect(m_process, &QProcess::readyReadStandardError, this, [=, this]() {
         QString errorLog = m_process->readAllStandardError();
         qWarning() << "FFmpeg错误输出:" << errorLog;
         if (errorLog.contains("Error") || errorLog.contains("Invalid")) {
@@ -60,7 +68,7 @@ void VideoCutter::cutVideo(const QString &inputPath, const QString &outputPath, 
         }
     });
 
-    connect(m_process, &QProcess::finished, this, [=](int exitCode, QProcess::ExitStatus) {
+    connect(m_process, &QProcess::finished, this, [=, this](int exitCode, QProcess::ExitStatus) {
         QString result = (exitCode == 0) ? "成功" : "失败";
         qDebug() << "FFmpeg进程结束:" << result << "，退出码:" << exitCode;
         emit finished(exitCode == 0, m_process->errorString());
@@ -74,7 +82,6 @@ void VideoCutter::previewCut(const QString &inputPath, qint64 startSec, qint64 e
 {
     // 计算持续时间（秒）
     qint64 durationSec = endSec - startSec;
-
     // 创建播放进程
     QProcess *player = new QProcess();
 
@@ -141,31 +148,7 @@ void VideoCutter::previewCut(const QString &inputPath, qint64 startSec, qint64 e
                 player->deleteLater();
             });
 }
-/**预览剪切视频，不用管道，不能运行？
-// void VideoCutter::previewCut(const QString &inputPath, qint64 startSec, qint64 endSec)
-// {
-//     QProcess *player = new QProcess();
-//     // 设置环境变量
-//     QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-//     env.insert("PATH", "/usr/local/bin:/usr/bin:/bin");
-//     env.insert("LD_LIBRARY_PATH", "/usr/local/lib:/usr/lib");
-//     player->setProcessEnvironment(env);
 
-//     QStringList args;
-
-//     args << "-ss" << QString::number(startSec) << "-to" << QString::number(endSec) << "-i" << inputPath
-//          << "-c copy -f matroska - | ffplay -autoexit -i -";
-
-//     qDebug() << "执行FFmpeg命令: ffmpeg" << args.join(" ");
-
-//     // 启动播放器
-//     player->start("ffplay", args);
-
-//     // 进程结束自动清理
-//     connect(player, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), player, &QProcess::deleteLater);
-// }
-
-*/
 void VideoCutter::getStartSec(qint64 startSec)
 {
     this->startSec = startSec;
@@ -175,6 +158,7 @@ void VideoCutter::getEndSec(qint64 endSec)
 {
     this->endSec = endSec;
 }
+
 qint64 VideoCutter::returnStartSec()
 {
     return startSec;
@@ -184,6 +168,7 @@ qint64 VideoCutter::returnEndSec()
 {
     return endSec;
 }
+
 void VideoCutter::handleProcessOutput()
 {
     QString log = m_process->readAllStandardOutput();
@@ -210,4 +195,84 @@ void VideoCutter::handleProcessOutput()
             }
         }
     }
+}
+
+bool VideoCutter::deletedir(const QString &dirpath)
+{
+    QDir dir(dirpath);
+
+    // 检查目录是否存在：检测
+    if (!dir.exists()) {
+        qDebug() << "Directory does not exist:" << dirpath;
+        return false;
+    }
+    // 删除目录及其所有内容，if调用函数删除，并检查
+    if (dir.removeRecursively()) {
+        qDebug() << "Directory deleted successfully:" << dirpath;
+        return true;
+    } else {
+        qDebug() << "Failed to delete directory:" << dirpath;
+        return false;
+    }
+}
+
+//save：一个视频多次剪切
+bool VideoCutter::savefile(const QString &inputPath, const QString &outputPath)
+{
+    std::string inputStdString = inputPath.toStdString();
+    std::string outputStdString = outputPath.toStdString();
+    // 构建 ffmpeg 命令
+    QString command = "ffmpeg -i " + inputPath + " -c copy " + outputPath;
+    std::string commandStdString = command.toStdString();
+    // 执行命令
+    int returnCode = system(commandStdString.c_str());
+
+    // 检查命令执行是否成功
+    if (returnCode != 0) {
+        std::cerr << "Error: Failed to execute ffmpeg command. Return code: " << returnCode << std::endl;
+        return false;
+    }
+
+    // 删除源文件
+    QFile sourceFile(inputPath);
+    if (!sourceFile.remove()) {
+        qWarning() << "Warning: Failed to delete source file:" << inputPath;
+        return false; // 返回 false 表示删除失败
+    }
+    qDebug() << "Video saved successfully and source file deleted:" << outputPath;
+    return true;
+}
+
+//移动剪切好的文件到用户自定义路径
+bool VideoCutter::movefile(const QString &sourcePath, const QString &destinationDir)
+{
+    QFile sourceFile(sourcePath);
+    QDir destinationDirectory(destinationDir);
+
+    // 检查源文件是否存在
+    if (!sourceFile.exists()) {
+        qWarning() << "Error: Source file does not exist.";
+        return false;
+    }
+    // 检查目标目录是否存在，如果不存在则创建
+    if (!destinationDirectory.exists()) {
+        if (!destinationDirectory.mkpath(".")) {
+            qWarning() << "Error: Failed to create destination directory.";
+            return false;
+        }
+    }
+    // 获取源文件的文件名
+    QString filename = QFileInfo(sourceFile).fileName();
+
+    // 构建目标文件路径
+    QString destinationPath = destinationDirectory.filePath(filename);
+
+    // 移动文件
+    if (!sourceFile.rename(destinationPath)) {
+        qWarning() << "Error: Failed to move file:" << sourceFile.errorString();
+        return false;
+    }
+
+    qDebug() << "Video moved successfully to:" << destinationPath;
+    return true;
 }

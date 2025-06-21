@@ -12,6 +12,11 @@ Item {
     property int currentPlayingIndex: -1
     property alias mplay:_mplay //素材视频/音频的播放
     property string inputPath1: ""
+    property var videoCPath: [" ", " ", " "," "," "]
+    property var videoQPath: [" ", " ", " "," "," "]
+    property int a: 0
+    property var fromTimes:[0,0,0,0,0]
+    property var toTimes:[0,0,0,0,0]
 
     ListModel{
         id:videoModel
@@ -383,6 +388,49 @@ Item {
                     }
                 }
             }
+            /**什么合并的玩意？
+            // // 时间轴 Slider
+            //    Slider {
+            //        id: slider
+            //        anchors.bottom: parent.bottom
+            //        anchors.horizontalCenter: parent.horizontalCenter
+            //        width: parent.width - 40 // 留出一些边距
+            //        from: 0
+            //        to: _mplay.duration > 0 ? _mplay.duration : 1000 // 默认值为 1000 毫秒（1 秒），避免为 0
+            //        value: _mplay.position
+            //        stepSize: 1000 // 步长为 1 秒
+
+            //        // 当用户拖动 Slider 时，跳转到视频的相应位置
+            //        onValueChanged: {
+            //            if (pressed) { // 仅在用户拖动滑块时更新
+            //                console.log("Slider value changed to:", value); // 调试输出
+            //                _mplay.position = value; // 使用 position 属性跳转
+            //            }
+            //        }
+            //    }
+
+            //    // 显示当前时间和总时长
+            //    Row {
+            //        anchors.bottom: slider.top
+            //        anchors.horizontalCenter: parent.horizontalCenter
+            //        spacing: 10
+
+            //        Text {
+            //            text: Controller.formatTime(_mplay.position)
+            //            color: "white"
+            //        }
+
+            //        Text {
+            //            text: "/"
+            //            color: "white"
+            //        }
+
+            //        Text {
+            //            text: Controller.formatTime(_mplay.duration)
+            //            color: "white"
+            //        }
+            //    }
+            */
         }
 
         VideoCutter {
@@ -441,6 +489,7 @@ Item {
                 anchors.centerIn: parent
                 spacing: 20
 
+                //button1:剪辑开始
                 Button {
                     id: button1
                     text:qsTr("剪辑开始")
@@ -449,7 +498,7 @@ Item {
                         currentButton = 2
                     }
                 }
-
+                //button2:剪辑的第一个节点
                 Button {
                     id: button2
                     visible: currentButton === 2
@@ -464,7 +513,7 @@ Item {
                         currentButton = 3
                     }
                 }
-
+                //button3:剪辑的第二个节点
                 Button {
                     id: button3
                     visible: currentButton === 3
@@ -480,7 +529,7 @@ Item {
                         currentButton = 4
                     }
                 }
-
+                //button4:预览
                 Button{
                     id:button4
                     text:qsTr("预览")
@@ -490,33 +539,32 @@ Item {
                         currentButton = 5
                     }
                 }
-
+                //button5:保存 | 继续剪切/退出
                 Button {
                     id: button5
-                    text:qsTr("保存？单击保存 | 双击取消")
+                    text:qsTr("单击保存 | 双击在此基础上继续剪切或退出")
                     //在双击操作时，会先触发一次单击事件，然后再触发双击事件
                     //所以这里采用计时器clickTimer
                     visible: currentButton === 5
-
                     property bool isDoubleClicked: false
 
                     onDoubleClicked: {
                         isDoubleClicked=true
-                        resultText.text = "已取消"
+                        resultText.text = "继续剪切 | 退出"
                         resultText.color = "blue"
-                        messageTimer.start()
-                        currentButton = 1
+                        currentButton = 6
                     }
                     onClicked: {
                         isDoubleClicked=false
                         clickTimer.start()
                     }
+                    //处理单击保存操作
                     Timer{
                         id:clickTimer
                         interval: 300 // 300毫秒是双击检测的合理时间
                         onTriggered:{
                             if(button5.isDoubleClicked==false){
-                                oneplayer.savefile.open()
+                                oneplayer.saveCut.open() // 剪切视频保存
                                 resultText.text = "处理中..."
                                 resultText.color = "blue"
                                 messageTimer.start()
@@ -531,14 +579,62 @@ Item {
                         onTriggered: resultText.text = ""
                     }
                 }
+                //button6:继续剪切：确认 | 退出
+                Button {
+                    id: button6
+                    text:qsTr("单击确认 | 双击退出")
+                    visible: currentButton === 6
+                    property bool isDoubleClicked: false
+                    onDoubleClicked: {
+                        isDoubleClicked=true
+                        resultText.text = "已退出剪切"
+                        resultText.color = "blue"
+                        messageTimer1.start()
+                        currentButton = 1
+                    }
+                    onClicked: {
+                        isDoubleClicked=false
+                        clickTimer1.start()
+                    }
+                    //处理单击继续剪切操作
+                    Timer{
+                        id:clickTimer1
+                        interval: 300 // 300毫秒是双击检测的合理时间
+                        onTriggered:{
+                            if(button6.isDoubleClicked==false){
+                                //保存到固定的的目录，保存剪切的视频并继续剪切
+                                var outputPath="/root/wawawawawa/ccc.mp4"
+                                Controller.processCut(inputPath1,outputPath)
+                                console.log("test QML input | output: ",inputPath1,outputPath)
+                                //将视频路径给oneplayer播放器
+                                oneplayer.mplay.stop()//结束上一个视频的播放
+                                oneplayer.mplay.source = "file:///root/wawawawawa/ccc.mp4"
+                                oneplayer.mplay.play()
 
+                                resultText.text = "处理中..."
+                                resultText.color = "blue"
+                                messageTimer.start()
+                                currentButton = 1
+                            }
+                        }
+                    }
+                    //resultText提示维持1秒
+                    Timer {
+                        id: messageTimer1
+                        interval: 1000
+                        onTriggered: resultText.text = ""
+                    }
+                }
+                //提示文本
                 Text {
                     id: resultText
                     font.pixelSize: 14
                     width: 300
                 }
             }
-            //处理按钮
+
+            //处理按钮：
+            //关闭原声
             Button{
                 id:cutaudio
                 text:"关闭原声"
@@ -549,6 +645,7 @@ Item {
                     noti.notification.show("已关闭原声")
                 }
             }
+            //打开原声
             Button{
                id:openaudio
                anchors.top:cutaudio.bottom
@@ -558,6 +655,7 @@ Item {
                    noti.notification.show("已打开原声")
                }
             }
+            //插入音频
             Button{
                 id:music
                 anchors.bottom: cutaudio.top
@@ -566,6 +664,7 @@ Item {
                    oneplayer.openmusic.open()
                 }
             }
+            //导出视频
             Button{
                id:ouput
                anchors.top: openaudio.bottom
@@ -574,22 +673,168 @@ Item {
                    oneplayer.savevideofile.open()
                }
             }
+
+
+        // Button{
+        //    id:savefileto
+        //    anchors.top: openaudio.bottom
+        //    text:"保存剪辑好的视频"
+        //    onClicked: {
+        //        //选择指定路径保存
+        //        oneplayer.savefile.open()
+
+        //        resultText.text = "处理中..."
+        //        resultText.color = "blue"
+
+        //        //删除前面产生的临时视频文件
+        //        //Controller.deletedir("/root/wawawawawa")
+        //    }
+        // }
+        Button{
+          id:mer1
+          text:"选择要合并的视频"
+          z:2
+          anchors.top: ouput.bottom
+          onClicked: {
+            dialog2.open()
+            mer2.z = 2
+          }
         }
+
+        Button {
+           id: mer2
+           z:1
+           text:qsTr("选择第一个节点")
+           anchors.top: mer1.top
+           onClicked: {
+               z = 1
+               mer3.z = 2
+               fromTimes[a] = oneplayer.mplay.position
+               console.log("时间点1:",fromTimes[a])
+           }
+        }
+
+        Button {
+           id: mer3
+           text:qsTr("选择第二个节点")
+           anchors.top: mer1.top
+           onClicked: {
+               z=0
+              toTimes[a] = oneplayer.mplay.position
+              console.log("时间点2:",toTimes[a])
+             a++
+           }
+        }
+
+        Button{
+          id:mer4
+          text:"预览合并好的视频"
+          anchors.top: mer1.bottom
+          onClicked: {
+            oneplayer.savemergerfile.open()
+          }
+        }
+
+        Dialog{
+          id: dialog2
+          width: 300
+          height: 200
+          modal: true
+          title: "请选择进行剪辑的视频"
+
+          Rectangle{
+             id:popup2
+             // width: (parent.width / 3.8)
+             // height: parent.height
+             anchors.fill: parent
+             color: "green"
+
+          ListView{
+              id:videoList3
+              anchors.fill:parent
+              spacing:5
+
+              ScrollBar.vertical: ScrollBar {
+                  policy: ScrollBar.AsNeeded
+              }
+
+              model:videoModel
+
+              delegate:Rectangle{
+                  id:rec3
+                  width:(videoList2.width)
+                  height:(videoList2.height / 2)
+                  border.color: "lightblue"
+                  radius: 5 //添加圆角半径
+                  color:{
+                      if (currentPlayingIndex === index) {
+                          return "lightblue" // 播放状态颜色
+                      } else {
+                          index % 2 === 0 ? "lightgrey" : "white"
+                      }
+                  }
+
+                  Video{
+                      id:_vvvv3
+                      //anchors.fill: parent
+                      anchors.left: parent.left
+                      width: parent.width/2
+                      height: parent.height
+                      source: model.filePath
+                      autoPlay: true
+                      muted: true
+                      loops: MediaPlayer.Infinite
+                      onPlaybackStateChanged: {
+                          seek(100)
+                          pause()
+                      }
+                  }
+
+                  TapHandler {
+                      onTapped: {
+                          console.log("Tapped filePath:", model.filePath); // 调试输出
+                          content.currentPlayingIndex = index
+                          console.log("now music index & currentPlayingIndex is ",index,content.currentPlayingIndex)
+                          oneplayer.mplay.source = model.filePath
+                          videoCPath[a] = model.filePath.toString().replace("file://", "")
+                          videoQPath[a] = model.filePath
+                          console.log(a,videoQPath[a])
+                          oneplayer.mplay.play()
+                          rightRect.showSelectButton = false
+                          dialog2.close() // 关闭对话框
+                      }
+                  }
+
+                  // 添加颜色过渡动画
+                  Behavior on color {
+                      ColorAnimation { duration: 1500 }
+                  }
+              }
+
+              //添加动画
+              add: Transition {
+                  NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 2000 }
+              }//透明度动画
+          }
+      }
     }
 
-    Actions{
-        id:act
-        a.onTriggered:oneplayer.openfile.open()
-        aa.onTriggered: oneplayer.mplay.play()
-        bb.onTriggered: oneplayer.mplay.pause()
-        cc.onTriggered: {
-                oneplayer.mplay.stop()
-                rightRect.showSelectButton = true // 确保停止按钮也显示select按钮
-        }
     }
-    Notification{
-        id:noti
-        anchors.horizontalCenter: parent.horizontalCenter
-        anchors.bottom: parent.bottom
+
+        Actions{
+            id:act
+            a.onTriggered:oneplayer.openfile.open()
+            aa.onTriggered: oneplayer.mplay.play()
+            bb.onTriggered: oneplayer.mplay.pause()
+            cc.onTriggered: {
+                    oneplayer.mplay.stop()
+                    rightRect.showSelectButton = true // 确保停止按钮也显示select按钮
+            }
+        }
+        Notification{
+            id:noti
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+        }
     }
 }
