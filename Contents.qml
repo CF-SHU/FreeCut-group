@@ -15,6 +15,7 @@ Item {
     property var videoCPath: [" ", " ", " "," "," "]
     property var videoQPath: [" ", " ", " "," "," "]
     property int a: 0
+    property int timerValue: 0 //生成临时剪切文件的计数器
     property var fromTimes:[0,0,0,0,0]
     property var toTimes:[0,0,0,0,0]
 
@@ -44,6 +45,17 @@ Item {
                     console.log("Videos path: ",filePath)
                 }
             }
+        }
+    }
+
+    VideoCutter {
+        id: cutter
+        onFinished: (success, error) => {
+            console.log("剪切结果:", success, error)
+            noti.text = success ? "剪切成功!" : "失败: " + error
+            //noti.notification.show(noti.text)
+            //这里需要优化，剪切0秒时提示错误❌
+            //剪切视频提示，调用Notification.qml
         }
     }
 
@@ -433,16 +445,7 @@ Item {
             */
         }
 
-        VideoCutter {
-            id: cutter
-            onFinished: (success, error) => {
-                console.log("剪切结果:", success, error)
-                noti.text = success ? "剪切成功!" : "失败: " + error
-                noti.notification.show(noti.text)
-                //这里需要优化，剪切0秒时提示错误❌
-                //剪切视频提示，调用Notification.qml
-            }
-        }
+
 
         //整体时间轴以及视频处理窗口
         Rectangle{
@@ -569,6 +572,7 @@ Item {
                                 resultText.color = "blue"
                                 messageTimer.start()
                                 currentButton = 1
+                                timerValue = 0
                             }
                         }
                     }
@@ -601,21 +605,43 @@ Item {
                         id:clickTimer1
                         interval: 300 // 300毫秒是双击检测的合理时间
                         onTriggered:{
-                            if(button6.isDoubleClicked==false){
+                            if(button6.isDoubleClicked===false){
                                 //保存到固定的的目录，保存剪切的视频并继续剪切
-                                var outputPath="/root/wawawawawa/ccc.mp4"
+                                let outputPath = "/root/wawawawawa/ccc"+timerValue+".mp4"
                                 Controller.processCut(inputPath1,outputPath)
                                 console.log("test QML input | output: ",inputPath1,outputPath)
-                                //将视频路径给oneplayer播放器
-                                oneplayer.mplay.stop()//结束上一个视频的播放
-                                oneplayer.mplay.source = "file:///root/wawawawawa/ccc.mp4"
-                                oneplayer.mplay.play()
-
-                                resultText.text = "处理中..."
-                                resultText.color = "blue"
-                                messageTimer.start()
                                 currentButton = 1
+                                timerValue++
                             }
+                        }
+                    }
+                    //连接c++后端函数槽
+                    Connections {
+                        target: cutter
+                        function onCutFinished(success, outputPath) {
+                            if(success) {
+                                console.log("剪切完成，准备播放:", outputPath)
+                                // 添加延迟器确保播放器状态重置
+                                playTimer.outputPath = outputPath
+                                playTimer.start()
+                                resultText.text = ""
+                            } else {
+                                resultText.text = "剪切失败"
+                                resultText.color = "red"
+                                messageTimer1.start()
+                            }
+                        }
+                    }
+                    // 播放定时器（解决立即播放问题）
+                    Timer {
+                        id: playTimer
+                        property string outputPath: ""
+                        interval: 100
+                        onTriggered: {
+                            oneplayer.mplay.stop()
+                            oneplayer.mplay.source = ""
+                            oneplayer.mplay.source = "file://" + outputPath
+                            oneplayer.mplay.play()
                         }
                     }
                     //resultText提示维持1秒
@@ -722,7 +748,7 @@ Item {
                z=0
               toTimes[a] = oneplayer.mplay.position
               console.log("时间点2:",toTimes[a])
-             a++
+              a++
            }
         }
 
@@ -776,7 +802,6 @@ Item {
 
                   Video{
                       id:_vvvv3
-                      //anchors.fill: parent
                       anchors.left: parent.left
                       width: parent.width/2
                       height: parent.height

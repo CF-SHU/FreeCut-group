@@ -1,3 +1,4 @@
+//Controller.js
 function processCut(inputPath1,outputPth1) {
     console.log("test cut path JS input | output: ",inputPath1,outputPth1)
     // console.log("test save Path: ",oneplayer.outputPath)
@@ -32,11 +33,11 @@ function deletefile(filepath)
     cutter.deletedir(filepath)
 }
 
-function savefile()
-{
-   cutter.savefile("/root/wawawawawa/ccc.mp4",outputPath)
-}
-function movefile()
-{
-    cutter.movefile("/root/wawawawawa/ccc.mp4",outputPath)
-}
+// function savefile()
+// {
+//    cutter.savefile("/root/wawawawawa/ccc.mp4",outputPath)
+// }
+// function movefile()
+// {
+//     cutter.movefile("/root/wawawawawa/ccc.mp4",outputPath)
+// }

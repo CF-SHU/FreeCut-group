@@ -115,9 +115,10 @@ Item {
         fileMode:FileDialog.SaveFile
         nameFilters:[ "Audio files (*.mp4 *.mov *.avi *.mkv *.mp3 *.wav *.flac *.ogg)" ]
         onAccepted: {
-            Controller.deletefile("/root/wawawawawa")
             outputPath = selectedFile.toString().replace("file://", "")
             console.log("输出文件路径:", outputPath)
+            Controller.deletefile("/root/wawawawawa")
+            Controller.processCut(inputPath1,outputPath)
         }
     }
 

@@ -21,11 +21,12 @@ public:
     Q_INVOKABLE bool movefile(const QString &sourcePath, const QString &destinationDir);
 
 signals:
-    void progressChanged(int percent);                 // 进度更新信号
-    void finished(bool success, const QString &error); // 完成信号
+    void progressChanged(int percent);                         // 进度更新信号,因为删除了processBar所以无用
+    void finished(bool success, const QString &error);         // 剪切完成信号
+    void cutFinished(bool success, const QString &outputPath); // 增加输出路径参数
 
 private slots:
-    void handleProcessOutput(); // 处理FFmpeg日志
+    //void handleProcessOutput(); // 处理FFmpeg日志
 
 private:
     QProcess *m_process;
