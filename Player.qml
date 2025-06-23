@@ -18,6 +18,8 @@ Item {
     property alias mplay:_mplay
     property alias musicplay:_musicplay
     property alias mSlider:_slider // 预览窗口时间轴 Slider
+    property alias watermark:_watermark//水印
+    property alias savewater:_savewater
     property string inputPath: ""
     property string outputPath: "/root/output.mp4"
     property string audioOutputPath: ""
@@ -57,6 +59,14 @@ Item {
         id:out
         anchors.fill:parent
     }
+    Watermark{
+        id:_watermark
+            anchors.fill: parent
+            text: "Sample Watermark"
+            color:"white"
+            size:26
+            position: Qt.point(50, 50) // 初始位置
+        }
     //musicplay
     MediaPlayer{
         id:_musicplay
@@ -141,6 +151,19 @@ Item {
         }
     }
 
+    //保存添加水印的视频
+    FileDialog{
+        id:_savewater
+        title: "Save your cut video which has be added watermark"
+        currentFolder:StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+        fileMode:FileDialog.SaveFile
+        nameFilters:[ "Audio files (*.mp4 *.mov *.avi *.mkv *.mp3 *.wav *.flac *.ogg)" ]
+        onAccepted: {
+            outputPath = selectedFile.toString().replace("file://", "")
+            console.log("输出文件路径:", outputPath)
+            watermark.addTextWatermarkToVideo(inputPath1,outputPath,_watermark.text,oneplayer.watermark.color,oneplayer.watermark.size)
+        }
+    }
 
 
     //保存合并的视频

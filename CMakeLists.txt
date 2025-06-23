@@ -31,6 +31,7 @@ qt_add_qml_module(appVideoclips
     SOURCES
     SOURCES videomerger.h videomerger.cpp
     SOURCES
+    SOURCES watermark.h watermark.cpp
 )
 
 target_compile_features(appVideoclips PRIVATE cxx_std_23)

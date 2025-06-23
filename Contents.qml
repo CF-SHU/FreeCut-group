@@ -774,6 +774,87 @@ Item {
                     }
                 }
             }
+            Rectangle {
+                id:addwatermark
+                width:parent.width / 6
+                height: parent.height / 8
+                color: "white"
+                border.color: "gray"
+                border.width: 3
+                radius: 5
+                anchors.top: merge.top
+                anchors.left: merge.right
+                anchors.leftMargin: 10
+                //button5:添加水印
+                Button{
+                    id:watermark
+                    text:qsTr("添加水印")
+                    width:addwatermark.width
+                    height:addwatermark.height
+                    highlighted: true
+                   // anchors.top: openaudio.bottom
+                    onClicked: {
+                       inputDialog.open();
+                    }
+                }
+                //用户点击“添加水印”按钮后，Popup对话框将打开。
+               // 用户在TextField中输入水印文本。
+               // 用户点击“确定”按钮后，输入的文本将传递给_watermark.text，对话框关闭。
+                Popup {
+                       id: inputDialog
+                       width: 200
+                       height: 100
+                       modal: true
+                       focus: true
+                       closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+
+                       ColumnLayout {
+                           anchors.fill: parent
+                           spacing: 10
+
+                           TextField {
+                               id: textInput
+                               placeholderText: qsTr("输入水印文本")
+                               Layout.fillWidth: true
+                           }
+                           ComboBox
+                           {
+                                id: colorInput
+                                model: ["white", "red", "green", "blue","black"]
+                                Layout.fillWidth: true
+                            }
+
+                            SpinBox
+                            {
+                                id: sizeInput
+                                from: 10
+                                to: 72
+                                value: 24
+                                Layout.fillWidth: true
+                            }
+                           Button {
+                               text: qsTr("确定")
+                               Layout.alignment: Qt.AlignRight
+                               onClicked: {
+                                    var customText = textInput.text;
+                                    var customColor = colorInput.currentText;
+                                    var customSize = sizeInput.value;
+
+                                    // 将参数传递给 oneplayer.watermark
+                                    oneplayer.watermark.text = customText;
+                                    oneplayer.watermark.color = customColor;
+                                    oneplayer.watermark.size = customSize;
+                                    inputDialog.close();
+
+                                   //选择文件路径保存加上水印的视频
+                                   //保存的时候将输出路径传给添加水印的函数，将水印添加到视频中
+                                   oneplayer.savewater.open();
+                               }
+                           }
+                       }
+                   }
+
+            }
         }
 
         Actions{
