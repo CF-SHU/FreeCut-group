@@ -28,8 +28,9 @@ qt_add_qml_module(appVideoclips
     SOURCES videomusic.h videomusic.cpp
     QML_FILES Notification.qml
     SOURCES
-    SOURCES videoconvertermerger.h videoconvertermerger.cpp
+    SOURCES
     SOURCES videomerger.h videomerger.cpp
+    SOURCES
 )
 
 target_compile_features(appVideoclips PRIVATE cxx_std_23)

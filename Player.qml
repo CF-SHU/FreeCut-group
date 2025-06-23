@@ -27,10 +27,6 @@ Item {
         id:vimu
     }
 
-    VideoConverterMerger{
-        id:vcm
-    }
-
     VideoMerger{
         id:vm
     }
@@ -82,6 +78,7 @@ Item {
             if (pressed) { // 仅在用户拖动滑块时更新
                 console.log("Slider value changed to:", value); // 调试输出
                 _mplay.position = value; // 使用 position 属性跳转
+                _musicplay.position = value
             }
         }
     }
@@ -124,7 +121,7 @@ Item {
             outputPath = selectedFile.toString().replace("file://", "")
             console.log("输出文件路径:", outputPath)
             Controller.deletefile("/root/wawawawawa")
-            Controller.processCut(inputPath1,outputPath)
+            Controller.processCut(inputPathPreview,outputPath)
         }
     }
 
@@ -140,7 +137,7 @@ Item {
             console.log("输出文件路径:", outputPath)
             //保存文件的函数
             //Controller.savefile()
-            Controller.processCut(inputPath1,"/root/wawawawawa/ccc.mp4")
+            Controller.processCut(inputPathPreview,"/root/wawawawawa/ccc.mp4")
         }
     }
 
@@ -195,9 +192,9 @@ Item {
         nameFilters:[ "Audio files (*.mp4 *.mov *.avi *.mkv *.wav)" ]
         onAccepted: {
             outputPath = selectedFile.toString().replace("file://", "")
-            vimu.replaceAudio(content.inputPath1,audioOutputPath,outputPath)
+            vimu.replaceAudio(content.inputPathPreview,audioOutputPath,outputPath)
             //result.text = success ? "成功！" : "失败！"
-            console.log(content.inputPath1)
+            console.log(content.inputPathPreview)
             console.log(audioOutputPath)
             console.log(outputPath)
         }
@@ -230,9 +227,9 @@ Item {
             console.log("第一个视频：",content.mergePath1)
             console.log("第一个视频：",content.mergePath2)
             vm.mergeVideos(content.mergePath1,content.mergePath2,outputPath)
-            //vcm.mergeDifferentFormatVideos(content.mergePath1,content.mergePath2,outputPath)
         }
     }
+
 
     MessageDialog{
         id:_about

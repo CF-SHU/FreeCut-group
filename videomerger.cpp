@@ -13,16 +13,22 @@ void VideoMerger::mergeVideos(const QString &inputPath1, const QString &inputPat
 
     // 构建FFmpeg命令
     QStringList args;
-    args << "-y" // 覆盖输出文件
-         << "-i" << inputPath1 << "-i" << inputPath2
-         << "-filter_complex"
-            "[0:v][0:a][1:v][1:a]concat=n=2:v=1:a=1[outv][outa]"
-         << "-map" << "[outv]"
-         << "-map" << "[outa]"
-         << "-c:v" << "libx264"
-         << "-preset" << "fast"
-         << "-c:a" << "aac" << outputPath;
+    args = {"-y",
+            "-i",
+            inputPath1,
+            "-i",
+            inputPath2,
+            "-filter_complex",
+            "[0:v:0][0:a:0][1:v:0][1:a:0]concat=n=2:v=1:a=1[outv][outa]",
+            "-map",
+            "[outv]",
+            "-map",
+            "[outa]",
+            outputPath};
 
+    qDebug() << "inputPath1:" << inputPath1;
+    qDebug() << "inputPath2:" << inputPath2;
+    qDebug() << "outputPath:" << outputPath;
     qDebug() << "执行FFmpeg命令:" << "ffmpeg" << args;
     m_process->start("ffmpeg", args);
 }
