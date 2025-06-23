@@ -17,7 +17,6 @@ Item {
     property alias about: _about
     property alias mplay:_mplay
     property alias musicplay:_musicplay
-    property alias vi:_vi
     property alias mSlider:_slider // 预览窗口时间轴 Slider
     property string inputPath: ""
     property string outputPath: "/root/output.mp4"
@@ -27,9 +26,15 @@ Item {
     VideoMusic{
         id:vimu
     }
-    VideoSegmentMerger{
-        id:_vi
+
+    VideoConverterMerger{
+        id:vcm
     }
+
+    VideoMerger{
+        id:vm
+    }
+
     //mplay
     MediaPlayer{
         id:_mplay
@@ -220,10 +225,12 @@ Item {
         fileMode:FileDialog.SaveFile
         nameFilters:[ "Audio files (*.mp4 *.oop *.avi *.wav)" ]
         onAccepted: {
-            //outputPath = "/root/output.mp4"
             outputPath = selectedFile.toString().replace("file://", "")
             console.log("输出文件路径:", outputPath)
-            vi.mergeTwoSegments(content.videoCPath[0],content.fromTimes[0],content.toTimes[0],content.videoCPath[1],content.fromTimes[1],content.toTimes[1],outputPath)
+            console.log("第一个视频：",content.mergePath1)
+            console.log("第一个视频：",content.mergePath2)
+            vm.mergeVideos(content.mergePath1,content.mergePath2,outputPath)
+            //vcm.mergeDifferentFormatVideos(content.mergePath1,content.mergePath2,outputPath)
         }
     }
 

@@ -12,12 +12,9 @@ Item {
     property int currentPlayingIndex: -1
     property alias mplay:_mplayer //素材视频/音频的播放
     property string inputPathPreview: ""
-    property var videoCPath: [" ", " ", " "," "," "]
-    property var videoQPath: [" ", " ", " "," "," "]
-    property int a: 0
     property int timerValue: 0 //生成临时剪切文件的计数器
-    property var fromTimes:[0,0,0,0,0]
-    property var toTimes:[0,0,0,0,0]
+    property string mergePath1:""
+    property string mergePath2:""
 
     ListModel{
         id:videoModel
@@ -370,15 +367,17 @@ Item {
 
                                 TapHandler {
                                     onTapped: {
-                                        console.log("Tapped filePath:", model.filePath); // 调试输出
+                                        //console.log("Tapped filePath:", model.filePath); // 调试输出
                                         content.currentPlayingIndex = index
-                                        console.log("now music index & currentPlayingIndex is ",index,content.currentPlayingIndex)
+                                        //console.log("now music index & currentPlayingIndex is ",index,content.currentPlayingIndex)
                                         oneplayer.mplay.source = model.filePath
                                         oneplayer.mplay.play()
                                         rightRect.showSelectButton = false // 隐藏select按钮
                                         dialog.close() // 关闭对话框
                                         //预览功能的输入路径
                                         inputPathPreview = model.filePath.toString().replace("file://", "") // 视频路径传给后端C++函数实现预览
+                                        mergePath2 = model.filePath.toString().replace("file://", "")//第二个要合并的视频的路径
+                                        console.log(mergePath2)
                                     }
                                 }
                                 // 添加颜色过渡动画
@@ -751,19 +750,31 @@ Item {
                 anchors.top: musicCut.top
                 anchors.leftMargin: 10
                 Button{
-                  id:mer1
-                  text:"选择要合并的视频"
-                  width: parent.width
-                  height: parent.height
-                  highlighted: true
-                  onClicked: {
-                    dialog2.open()
-                    mer2.z = 2
+                    id:mer1
+                    text:"选择要合并的视频"
+                    anchors.left: parent.left
+                    width: (parent.width / 3) * 2
+                    height: parent.height
+                    highlighted: true
+                    onClicked: {
+                        mergePath1 = oneplayer.mplay.source.toString().replace("file://", "")//第一个要合并的视频的路径
+                        console.log(mergePath1)
+                        dialog.open()
                   }
                 }
+                Button{
+                    id:mer2
+                    text:"确定"
+                    anchors.left: mer1.right
+                    width: parent.width / 3
+                    height:parent.height
+                    highlighted: true
+                    onClicked: {
+                        oneplayer.savemergerfile.open()
+                    }
+                }
             }
-
-    }
+        }
 
         Actions{
             id:act
