@@ -53,5 +53,12 @@ void VideoSegmentMerger::mergeTwoSegments(const QString& video1Path,
          << "-c:a" << "aac" << outputPath;
 
     qDebug() << "FFmpeg命令:" << "ffmpeg" << args;
+
+    connect(m_process, &QProcess::finished, this, [=, this](int exitCode, QProcess::ExitStatus) {
+        bool success = (exitCode == 0);
+        QString resultMsg = success ? "成功" : "失败";
+        qDebug() << "FFmpeg剪切完成:" << resultMsg;
+        emit segmentFinished(success, outputPath); // 发射信号包含输出路径
+    });
     m_process->start("ffmpeg", args);
 }

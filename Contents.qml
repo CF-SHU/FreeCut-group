@@ -11,7 +11,7 @@ Item {
     property alias dialog:_dialog//
     property int currentPlayingIndex: -1
     property alias mplay:_mplay //素材视频/音频的播放
-    property string inputPath1: ""
+    property string inputPathPreview: ""
     property var videoCPath: [" ", " ", " "," "," "]
     property var videoQPath: [" ", " ", " "," "," "]
     property int a: 0
@@ -383,7 +383,8 @@ Item {
                                         oneplayer.mplay.play()
                                         rightRect.showSelectButton = false // 隐藏select按钮
                                         dialog.close() // 关闭对话框
-                                        inputPath1 = model.filePath.toString().replace("file://", "") // 视频路径传给后端C++函数实现预览
+                                        //预览功能的输入路径
+                                        inputPathPreview = model.filePath.toString().replace("file://", "") // 视频路径传给后端C++函数实现预览
                                     }
                                 }
                                 // 添加颜色过渡动画
@@ -444,7 +445,6 @@ Item {
             //    }
             */
         }
-
 
 
         //整体时间轴以及视频处理窗口
@@ -511,7 +511,7 @@ Item {
                         return Math.floor(milliseconds / 1000); // 返回秒数
                     }
                     onClicked: {
-                        console.log("Current time:", formatTime(oneplayer.mplay.position)); // 打印当前时间
+                        console.log("Current time 124352463574685796 button2剪切节点1:", formatTime(oneplayer.mplay.position)); // 打印当前时间
                         cutter.getStartSec(formatTime(oneplayer.mplay.position));
                         currentButton = 3
                     }
@@ -527,7 +527,7 @@ Item {
                         return Math.floor(milliseconds / 1000); // 返回秒数
                     }
                     onClicked: {
-                        console.log("Current time:", formatTime(oneplayer.mplay.position)); // 打印当前时间
+                        console.log("Current time 213524678932435 button3剪切节点2:", formatTime(oneplayer.mplay.position)); // 打印当前时间
                         cutter.getEndSec(formatTime(oneplayer.mplay.position));
                         currentButton = 4
                     }
@@ -538,7 +538,8 @@ Item {
                     text:qsTr("预览")
                     visible: currentButton === 4
                     onClicked: {
-                        cutter.previewCut(inputPath1,cutter.returnStartSec(),cutter.returnEndSec())
+                        console.log("current preview video inputPathPreview,cutter.returnStartSec(),cutter.returnEndSec() ：",inputPathPreview,cutter.returnStartSec(),cutter.returnEndSec())
+                        cutter.previewCut(inputPathPreview,cutter.returnStartSec(),cutter.returnEndSec())
                         currentButton = 5
                     }
                 }
@@ -607,9 +608,10 @@ Item {
                         onTriggered:{
                             if(button6.isDoubleClicked===false){
                                 //保存到固定的的目录，保存剪切的视频并继续剪切
-                                let outputPath = "/root/wawawawawa/ccc"+timerValue+".mp4"
-                                Controller.processCut(inputPath1,outputPath)
-                                console.log("test QML input | output: ",inputPath1,outputPath)
+                                var outputPath = "/root/wawawawawa/ccc"+timerValue+".mp4"
+                                Controller.processCut(inputPathPreview,outputPath)
+                                inputPathPreview = outputPath
+                                console.log("test QML input | output: ",inputPathPreview,outputPath)
                                 currentButton = 1
                                 timerValue++
                             }
@@ -700,7 +702,6 @@ Item {
                }
             }
 
-
         // Button{
         //    id:savefileto
         //    anchors.top: openaudio.bottom
@@ -757,7 +758,36 @@ Item {
           text:"预览合并好的视频"
           anchors.top: mer1.bottom
           onClicked: {
-            oneplayer.savemergerfile.open()
+            oneplayer.savemergerfile.open()   
+          }
+          //连接c++后端函数槽
+          Connections {
+              target: oneplayer.vi
+              function onSegmentFinished(success, outputPath) {
+                  if(success) {
+                      console.log("剪切完成，准备播放:", outputPath)
+                      // 添加延迟器确保播放器状态重置
+                      playTimermer4.outputPath = outputPath
+                      playTimermer4.start()
+                      resultText.text = ""
+                  } else {
+                      resultText.text = "剪切失败"
+                      resultText.color = "red"
+                      messageTimer1.start()
+                  }
+              }
+          }
+          // 播放定时器（解决立即播放问题）
+          Timer {
+              id: playTimermer4
+              property string outputPath: ""
+              interval: 100
+              onTriggered: {
+                  oneplayer.mplay.stop()
+                  oneplayer.mplay.source = ""
+                  oneplayer.mplay.source = "file://" + outputPath
+                  oneplayer.mplay.play()
+              }
           }
         }
 

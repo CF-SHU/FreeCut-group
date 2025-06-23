@@ -25,6 +25,7 @@ public:
 signals:
     void progressChanged(int percent);
     void finished(bool success, const QString& message);
+    void segmentFinished(bool success, const QString& outputPath); // 增加输出路径参数
 
 private:
     QProcess* m_process;

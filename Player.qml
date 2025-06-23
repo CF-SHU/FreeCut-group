@@ -10,13 +10,14 @@ Item {
     anchors.fill: parent
     property alias openfile:_openfile
     property alias saveCut: _saveCut
-    property alias saveSomeCut: _saveSomeCut
+    property alias saveSomeCut: _saveSomeCut //暂时没什么用
     property alias openmusic:_openmusic
     property alias savevideofile:_savevideofile
     property alias savemergerfile:_savemergerfile
     property alias about: _about
     property alias mplay:_mplay
     property alias musicplay:_musicplay
+    property alias vi:_vi
     property alias mSlider:_slider // 预览窗口时间轴 Slider
     property string inputPath: ""
     property string outputPath: "/root/output.mp4"
@@ -27,7 +28,7 @@ Item {
         id:vimu
     }
     VideoSegmentMerger{
-        id:vi
+        id:_vi
     }
     //mplay
     MediaPlayer{
@@ -224,7 +225,6 @@ Item {
             console.log("输出文件路径:", outputPath)
             vi.mergeTwoSegments(content.videoCPath[0],content.fromTimes[0],content.toTimes[0],content.videoCPath[1],content.fromTimes[1],content.toTimes[1],outputPath)
         }
-
     }
 
     MessageDialog{
