@@ -36,8 +36,8 @@ Item {
         videoOutput:out
         audioOutput:AudioOutput{}
         onPositionChanged: {
-            if (!slider.pressed) { // 仅在用户未拖动滑块时更新
-                slider.value = _mplay.position;
+            if (!mSlider.pressed) { // 仅在用户未拖动滑块时更新
+                mSlider.value = _mplay.position;
             }
         }
         onDurationChanged: {
