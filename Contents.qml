@@ -10,6 +10,7 @@ import Videoclips 1.0
 Item {
     property alias dialog:_dialog//
     property int currentPlayingIndex: -1
+    property int currentPlayingIndex1: -1
     property alias mplay:_mplayer //素材视频/音频的播放
     property string inputPathPreview: ""
     property int timerValue: 0 //生成临时剪切文件的计数器
@@ -69,9 +70,17 @@ Item {
             //素材导入窗口
             Rectangle{
                 id:left
-                Layout.preferredWidth: parent.width * 0.15
+                Layout.preferredWidth: parent.width * 0.12
                 Layout.preferredHeight: parent.height - bottomRect.height
-                color: "green"
+                //color: "black"
+                gradient: Gradient {
+                        GradientStop { position: 0.3; color: "black" }
+                        GradientStop { position: 0.8; color: "#2a0132" }
+                    }
+                // gradient: Gradient {
+                //         GradientStop { position: 0.2; color: "#520162" }
+                //         GradientStop { position: 0.9; color: "#2a0132" }//#520162
+                //     }
 
                 ListView{
                     id:videoList
@@ -95,7 +104,7 @@ Item {
                             if (currentPlayingIndex === index) {
                                 return "lightblue" // 播放状态颜色
                             } else {
-                                index % 2 === 0 ? "lightgrey" : "white"
+                                index % 2 === 0 ? "#302d2c" : "white"
                             }
                         }
 
@@ -164,9 +173,18 @@ Item {
             //素材播放窗口
             Rectangle{
                 id:mid
-                Layout.preferredWidth: parent.width * 0.35
+                Layout.preferredWidth: parent.width * 0.38
                 Layout.preferredHeight: left.height
-                color: "blue"
+                //color: "black"
+                gradient: Gradient {
+                        GradientStop { position: 0.3; color: "black" }
+                        GradientStop { position: 0.8; color: "#2a0132" }
+                    }
+                // gradient: Gradient {
+                //         GradientStop { position: 0.2; color: "#520162" }
+                //         GradientStop { position: 0.9; color: "#2a0132" }//#520162
+                //     }
+                border.width: 1
 
                 Column{
                     anchors.fill: parent
@@ -182,7 +200,13 @@ Item {
                     Rectangle{
                         width: parent.width
                         height: parent.height
-                        color: "blue"
+                        //color: "black"
+                        //opacity:0
+                        gradient: Gradient {
+                                GradientStop { position: 0.3; color: "black" }
+                                GradientStop { position: 0.8; color: "#2a0132" }
+                            }
+                        border.width: 1
                         MediaPlayer{
                             id:_mplayer
                             videoOutput:out
@@ -232,8 +256,16 @@ Item {
                 id:rightRect
                 Layout.preferredWidth: parent.width * 0.5
                 Layout.preferredHeight: left.height
-                color:"black"
-                border.color:"black"
+                //color:"black"
+                gradient: Gradient {
+                        GradientStop { position: 0.3; color: "black" }
+                        GradientStop { position: 0.8; color: "#2a0132" }
+                    }
+                // gradient: Gradient {
+                //         GradientStop { position: 0.2; color: "#520162" }
+                //         GradientStop { position: 0.9; color: "#2a0132" }//#520162
+                //     }
+                //border.color:"white"
                 // 添加一个属性来控制select按钮的可见性
                 property bool showSelectButton: true
 
@@ -306,7 +338,7 @@ Item {
                     Rectangle{
                         id:popup
                         anchors.fill: parent
-                        color: "green"
+                        color: "#2b3d40"
 
                         ListView{
                             id:videoList2
@@ -444,9 +476,16 @@ Item {
         Rectangle{
             id:bottomRect
             Layout.fillWidth: true
-            Layout.preferredHeight: parent.height * 0.5 // 下半部分占50%高度
-            color:"pink"
-            border.color:"pink"
+            Layout.preferredHeight: parent.height * 0.4 // 下半部分占50%高度
+            //color:"#43074f"
+            // gradient: Gradient {
+            //         GradientStop { position: 0.2; color: "#2a0132" }
+            //         GradientStop { position: 0.9; color: "#520162" }
+            //     }
+            gradient: Gradient {
+                    GradientStop { position: 0.5; color: "#2a0132" }
+                    GradientStop { position: 0.9; color: "black" }
+                }
 
             //与预览窗口结合的时间轴 Slider2
             Slider {
@@ -832,7 +871,7 @@ Item {
                                 value: 24
                                 Layout.fillWidth: true
                             }
-                           Button {
+                           Button {                               
                                text: qsTr("确定")
                                Layout.alignment: Qt.AlignRight
                                onClicked: {
