@@ -161,7 +161,8 @@ Item {
         onAccepted: {
             outputPath = selectedFile.toString().replace("file://", "")
             console.log("输出文件路径:", outputPath)
-            watermark.addTextWatermarkToVideo(inputPath1,outputPath,_watermark.text,oneplayer.watermark.color,oneplayer.watermark.size)
+            watermark.addTextWatermarkToVideo(inputPathPreview,outputPath,_watermark.text,_watermark.color,_watermark.size)
+
         }
     }
 

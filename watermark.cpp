@@ -1,5 +1,3 @@
-// Watermark.cpp
-
 #include "watermark.h"
 
 Watermark::Watermark(QQuickItem *parent) : QQuickPaintedItem(parent)
@@ -34,25 +32,21 @@ Watermark::~Watermark() {}
 void Watermark::addTextWatermarkToVideo(const QString &inputFile,
                                         const QString &outputFile,
                                         const QString &watermarkText,
-                                        const QColor &color,
+                                        const QString &color,
                                         const int &size)
 {
     QProcess ffmpeg;
     QStringList args;
 
-    // 将QColor转换为FFmpeg可接受的颜色格式（例如：白色为white，红色为red等）
-    QString colorString
-        = QString("%1,%2,%3,%4").arg(color.redF()).arg(color.greenF()).arg(color.blueF()).arg(color.alphaF());
-
     args << "-i" << inputFile;
     args << "-vf"
-         << QString("drawtext=text='%1':x=mod(n\\, w)/2:y=mod(n\\, h)/10:fontsize=%2:fontcolor=%3:alpha=0.5")
+         << QString("drawtext=text='%1':x=mod(n\\, w)/2:y=mod(n\\, h)/10:fontsize=%2:fontcolor=%3:alpha=0.7")
                 .arg(watermarkText)
                 .arg(size)
-                .arg(colorString);
+                .arg(color);
 
     //args << "-vf" << QString("drawtext=text='%1':x=10:y=10:fontsize=24:fontcolor=white:alpha=0.7").arg(watermarkText);
-    // args << "-c:v" << "libx264"; // 使用H.264编解码器
+    //args << "-c:v" << "libx264"; // 使用H.264编解码器
     // args << "-c:a" << "aac";     // 使用AAC音频编解码器
     // args << "-preset" << "fast"; // 编码速度和压缩率的平衡
     // args << "-crf" << "23";      // 控制视频质量
@@ -76,12 +70,12 @@ void Watermark::setText(const QString &text)
     }
 }
 
-QColor Watermark::color() const
+QString Watermark::color() const
 {
     return m_color;
 }
 
-void Watermark::setColor(const QColor &color)
+void Watermark::setColor(const QString &color)
 {
     if (m_color != color) {
         m_color = color;
@@ -126,8 +120,7 @@ void Watermark::paint(QPainter *painter)
     QFont font = painter->font();
     font.setPointSize(m_size);
     painter->setFont(font);
-    //painter->setPen(Qt::red);              //设置文本颜色为红色
-    //painter->setFont(QFont("Arial", 20));  //设置文本字体为Arial，字号为20
+
     // 绘制文本
     painter->drawText(m_position, m_text); //在m_position位置绘制m_text文本
 }
