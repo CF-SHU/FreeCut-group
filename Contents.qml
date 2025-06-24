@@ -10,15 +10,16 @@ import Videoclips 1.0
 Item {
     property alias dialog:_dialog
     property int currentPlayingIndex: -1
+    property int currentPlayingIndex1: -1 //?????????
     property alias mplay:_mplayer //素材视频/音频的播放
     property string inputPathPreview: ""
-    property string outputPathPip:""
+    property string outputPathPip:""//画中画输出路径（用户自定义
     property var videoCPath: [" ", " ", " "," "," "]
     property var videoQPath: [" ", " ", " "," "," "]
     property int a: 0
     property int timerValue: 0 //生成临时剪切文件的计数器
-    property var fromTimes:[0,0,0,0,0]
-    property var toTimes:[0,0,0,0,0]
+    property string mergePath1:""
+    property string mergePath2:""
 
     ListModel{
         id:videoModel
@@ -95,9 +96,17 @@ Item {
             //素材导入窗口
             Rectangle{
                 id:left
-                Layout.preferredWidth: parent.width * 0.15
+                Layout.preferredWidth: parent.width * 0.12
                 Layout.preferredHeight: parent.height - bottomRect.height
-                color: "green"
+                //color: "black"
+                gradient: Gradient {
+                        GradientStop { position: 0.3; color: "black" }
+                        GradientStop { position: 0.8; color: "#2a0132" }
+                    }
+                // gradient: Gradient {
+                //         GradientStop { position: 0.2; color: "#520162" }
+                //         GradientStop { position: 0.9; color: "#2a0132" }//#520162
+                //     }
 
                 ListView{
                     id:videoList
@@ -121,7 +130,7 @@ Item {
                             if (currentPlayingIndex === index) {
                                 return "lightblue" // 播放状态颜色
                             } else {
-                                index % 2 === 0 ? "lightgrey" : "white"
+                                index % 2 === 0 ? "#302d2c" : "white"
                             }
                         }
 
@@ -188,9 +197,18 @@ Item {
             //素材播放窗口
             Rectangle{
                 id:mid
-                Layout.preferredWidth: parent.width * 0.35
+                Layout.preferredWidth: parent.width * 0.38
                 Layout.preferredHeight: left.height
-                color: "blue"
+                //color: "black"
+                gradient: Gradient {
+                        GradientStop { position: 0.3; color: "black" }
+                        GradientStop { position: 0.8; color: "#2a0132" }
+                    }
+                // gradient: Gradient {
+                //         GradientStop { position: 0.2; color: "#520162" }
+                //         GradientStop { position: 0.9; color: "#2a0132" }//#520162
+                //     }
+                border.width: 1
 
                 Column{
                     anchors.fill: parent
@@ -206,7 +224,13 @@ Item {
                     Rectangle{
                         width: parent.width
                         height: parent.height
-                        color: "blue"
+                        //color: "black"
+                        //opacity:0
+                        gradient: Gradient {
+                                GradientStop { position: 0.3; color: "black" }
+                                GradientStop { position: 0.8; color: "#2a0132" }
+                            }
+                        border.width: 1
                         MediaPlayer{
                             id:_mplayer
                             videoOutput:out
@@ -259,6 +283,16 @@ Item {
                 color:"black"
                 border.color:"black"
                 clip: true // 确保子元素-addVideo矩形不会超出边界显示
+                gradient: Gradient {
+                        GradientStop { position: 0.3; color: "black" }
+                        GradientStop { position: 0.8; color: "#2a0132" }
+                    }
+                // gradient: Gradient {
+                //         GradientStop { position: 0.2; color: "#520162" }
+                //         GradientStop { position: 0.9; color: "#2a0132" }//#520162
+                //     }
+                //border.color:"white"
+
                 // 添加一个属性来控制select按钮的可见性
                 property bool showSelectButton: true
 
@@ -330,7 +364,7 @@ Item {
                     Rectangle{
                         id:popup
                         anchors.fill: parent
-                        color: "green"
+                        color: "#2b3d40"
 
                         ListView{
                             id:videoList2
@@ -391,15 +425,17 @@ Item {
 
                                 TapHandler {
                                     onTapped: {
-                                        console.log("Tapped filePath:", model.filePath); // 调试输出
+                                        //console.log("Tapped filePath:", model.filePath); // 调试输出
                                         content.currentPlayingIndex = index
-                                        console.log("now music index & currentPlayingIndex is ",index,content.currentPlayingIndex)
+                                        //console.log("now music index & currentPlayingIndex is ",index,content.currentPlayingIndex)
                                         oneplayer.mplay.source = model.filePath
                                         oneplayer.mplay.play()
                                         rightRect.showSelectButton = false // 隐藏select按钮
                                         dialog.close() // 关闭对话框
                                         //预览功能的输入路径
                                         inputPathPreview = model.filePath.toString().replace("file://", "") // 视频路径传给后端C++函数实现预览
+                                        mergePath2 = model.filePath.toString().replace("file://", "")//第二个要合并的视频的路径
+                                        console.log(mergePath2)
                                     }
                                 }
 
@@ -479,9 +515,16 @@ Item {
         Rectangle{
             id:bottomRect
             Layout.fillWidth: true
-            Layout.preferredHeight: parent.height * 0.5 // 下半部分占50%高度
-            color:"pink"
-            border.color:"pink"
+            Layout.preferredHeight: parent.height * 0.4 // 下半部分占50%高度
+            //color:"#43074f"
+            // gradient: Gradient {
+            //         GradientStop { position: 0.2; color: "#2a0132" }
+            //         GradientStop { position: 0.9; color: "#520162" }
+            //     }
+            gradient: Gradient {
+                    GradientStop { position: 0.5; color: "#2a0132" }
+                    GradientStop { position: 0.9; color: "black" }
+                }
 
             //与预览窗口结合的时间轴 Slider2
             Slider {
@@ -777,7 +820,7 @@ Item {
                 }
             }
             //合并视频按钮
-            Rectangle{
+            Rectangle {
                 id:merge
                 width:parent.width / 6
                 height: parent.height / 8
@@ -791,14 +834,210 @@ Item {
                 Button{
                     id:mer1
                     text:"选择要合并的视频"
-                    width: parent.width
+                    anchors.left: parent.left
+                    width: (parent.width / 3) * 2
                     height: parent.height
                     highlighted: true
                     onClicked: {
-                        dialog2.open()
-                        mer2.z = 2
+                        mergePath1 = oneplayer.mplay.source.toString().replace("file://", "")//第一个要合并的视频的路径
+                        console.log(mergePath1)
+                        dialog.open()
                     }
                 }
+                Button{
+                    id:mer2
+                    text:"确定"
+                    anchors.left: mer1.right
+                    width: parent.width / 3
+                    height:parent.height
+                    highlighted: true
+                    onClicked: {
+                        oneplayer.savemergerfile.open()
+                    }
+                }
+            }
+            //水印按钮
+            Rectangle {
+                id:addwatermark
+                width:parent.width / 6
+                height: parent.height / 8
+                color: "white"
+                border.color: "gray"
+                border.width: 3
+                radius: 5
+                anchors.top: merge.top
+                anchors.left: merge.right
+                anchors.leftMargin: 10
+                //button5:添加水印
+                Button{
+                    id:watermark
+                    text:qsTr("添加水印")
+                    width:addwatermark.width
+                    height:addwatermark.height
+                    highlighted: true
+                   // anchors.top: openaudio.bottom
+                    onClicked: {
+                       inputDialog.open();
+                    }
+                }
+                // 提示信息
+                Text {
+                    id: statusText
+                    anchors.top: addwatermark.bottom  // 将提示信息定位在 addwatermark 的下方
+                    anchors.horizontalCenter: addwatermark.horizontalCenter  // 水平居中
+                    text: ""
+                    color: "green"
+                    font.pixelSize: 14
+                    visible: false
+                }
+                // 用于隐藏提示信息的定时器
+                Timer {
+                    id: hideStatusTimer
+                    interval: 3000 // 3秒
+                    onTriggered: {
+                        statusText.visible = false;
+                    }
+                }
+                //用户点击“添加水印”按钮后，Popup对话框将打开。
+               // 用户在TextField中输入水印文本。
+               // 用户点击“确定”按钮后，输入的文本将传递给_watermark.text，对话框关闭。
+                Popup {
+                    id: inputDialog
+                    width: 200
+                    height: 100
+                    modal: true
+                    focus: true
+                    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                    ScrollView {
+                        anchors.fill: parent
+                        contentWidth: parent.width
+                        contentHeight: columnLayout.height
+
+                        ColumnLayout {
+                            anchors.fill: parent
+                            spacing: 10
+
+                            TextField {
+                                id: textInput
+                                placeholderText: qsTr("输入水印文本")
+                                Layout.fillWidth: true
+                                // 可选：自定义placeholderText的颜色
+                                placeholderTextColor: "gray"
+
+                                // 监听文本变化
+                                onTextChanged: {
+                                    if (text === "") {
+                                        // 文本为空时，placeholderText会自动显示
+                                    }
+                                }
+                            }
+
+                            RowLayout {
+                                spacing: 5
+                                Layout.fillWidth: true
+
+                                Text {
+                                    text: qsTr("颜色:")
+                                    font.pixelSize: 14
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
+                                ComboBox
+                                {
+                                     id: colorInput
+                                     model: ["white", "red", "green", "blue","black","purple","pink","yellow","orange"]
+                                     Layout.fillWidth: true
+                                 }
+                            }
+                            RowLayout {
+                                spacing: 5
+                                Layout.fillWidth: true
+
+                                Text {
+                                    text: qsTr("透明度:")
+                                    font.pixelSize: 14
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                ComboBox
+                                {
+                                     id: alphaInput
+                                     model: ["0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"]
+                                     Layout.fillWidth: true
+                                 }
+                            }
+                            RowLayout {
+                                spacing: 5
+                                Layout.fillWidth: true
+
+                                Text {
+                                    text: qsTr("字体大小:")
+                                    font.pixelSize: 14
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                 SpinBox
+                                 {
+                                     id: sizeInput
+                                     from: 10
+                                     to: 72
+                                     value: 24
+                                     Layout.fillWidth: true
+                                 }
+                            }
+                            RowLayout {
+                                   spacing: 5
+                                   Layout.fillWidth: true
+
+                                   Text {
+                                       text: qsTr("移动模式:")
+                                       font.pixelSize: 14
+                                       anchors.verticalCenter: parent.verticalCenter
+                                   }
+
+                                   ComboBox {
+                                       id: movementModeInput
+                                       model: [
+                                           qsTr("水平移动"),
+                                           qsTr("上下移动"),
+                                           qsTr("对角线移动"),
+                                           qsTr("固定不变")
+                                       ]
+                                       currentIndex: 0  // 默认选择第一个选项
+                                       Layout.fillWidth: true
+                                   }
+                             }
+                            Button {
+                                text: qsTr("确定")
+                                Layout.alignment: Qt.AlignRight
+                                onClicked: {
+                                     var customText = textInput.text;
+                                     var customColor = colorInput.currentText;
+                                     var customSize = sizeInput.value;
+                                    var customAlpha = parseFloat(alphaInput.currentText);
+
+                                     // 将参数传递给 oneplayer.watermark
+                                     oneplayer.watermark.text = customText;
+                                     oneplayer.watermark.color = customColor;
+                                     oneplayer.watermark.size = customSize;
+                                    oneplayer.watermark.alpha = customAlpha;
+
+                                     inputDialog.close();
+
+                                    // 连接 watermarkAdded 信号
+                                       oneplayer.watermark.watermarkAdded.connect(function() {
+                                           statusText.text = qsTr("水印添加成功！");
+                                           statusText.visible = true;
+                                            hideStatusTimer.start(); // 启动定时器
+                                       });
+
+                                    //选择文件路径保存加上水印的视频
+                                    //保存的时候将输出路径传给添加水印的函数，将水印添加到视频中
+                                    oneplayer.savewater.open();
+                                }
+                            }
+                        }
+                    }
+
+             }
             }
             //画中画按钮
             Rectangle{
@@ -809,10 +1048,13 @@ Item {
                 border.color: "gray"
                 border.width: 3
                 radius: 5
-                anchors.left: merge.right
-                anchors.top: merge.top
+                anchors.left: addwatermark.right
+                anchors.top: addwatermark.top
                 anchors.leftMargin: 10
+
                 property int currentButton: 1
+
+                //画中画按钮
                 Button{
                     id:addV
                     visible: currentButton === 1
@@ -884,22 +1126,23 @@ Item {
                     }
                 }
             }
-        }
 
-        Actions{
-            id:act
-            a.onTriggered:oneplayer.openfile.open()
-            aa.onTriggered: oneplayer.mplay.play()
-            bb.onTriggered: oneplayer.mplay.pause()
-            cc.onTriggered: {
-                    oneplayer.mplay.stop()
-                    rightRect.showSelectButton = true // 确保停止按钮也显示select按钮
-            }
         }
-        Notification{
-            id:noti
-            anchors.horizontalCenter: parent.horizontalCenter
-            anchors.bottom: parent.bottom
+    }
+
+    Actions{
+        id:act
+        a.onTriggered:oneplayer.openfile.open()
+        aa.onTriggered: oneplayer.mplay.play()
+        bb.onTriggered: oneplayer.mplay.pause()
+        cc.onTriggered: {
+                oneplayer.mplay.stop()
+                rightRect.showSelectButton = true // 确保停止按钮也显示select按钮
         }
+    }
+    Notification{
+        id:noti
+        anchors.horizontalCenter: parent.horizontalCenter
+        anchors.bottom: parent.bottom
     }
 }

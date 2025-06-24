@@ -12,13 +12,14 @@ Item {
     property alias saveCut: _saveCut
     //property alias saveSomeCut: _saveSomeCut //暂时没什么用
     property alias openmusic:_openmusic
-    property alias openAddV: _openAddV //画中画添加
     property alias savevideofile:_savevideofile
+    property alias savemergerfile:_savemergerfile
     property alias about: _about
     property alias mplay:_mplay
-    //property alias twoPlay: _twoPlay
     property alias musicplay:_musicplay
     property alias mSlider:_slider // 预览窗口时间轴 Slider
+    property alias watermark:_watermark//水印
+    property alias savewater:_savewater
     property string inputPath: ""
     property string outputPath: "/root/output.mp4"
     property string audioOutputPath: ""
@@ -26,6 +27,10 @@ Item {
     VideoMusic{
         id:vimu
     }
+    VideoMerger{
+        id:vm
+    }
+
     //mplay，用于预览窗口播放素材的实例化
     MediaPlayer{
         id:_mplay
@@ -53,6 +58,11 @@ Item {
         anchors.fill:parent
     }
 
+    Watermark{
+        id:_watermark
+        position: Qt.point(50, 50) // 初始位置
+    }
+
     //musicplay,打开音乐按钮的播放
     MediaPlayer{
         id:_musicplay
@@ -74,6 +84,7 @@ Item {
             if (pressed) { // 仅在用户拖动滑块时更新
                 console.log("Slider value changed to:", value); // 调试输出
                 _mplay.position = value; // 使用 position 属性跳转
+                _musicplay.position = value
             }
         }
     }
@@ -133,10 +144,68 @@ Item {
             console.log("输出文件路径:", outputPath)
             //保存文件的函数
             //Controller.savefile()
-            Controller.processCut(inputPath1,"/root/wawawawawa/ccc.mp4")
+            Controller.processCut(inputPathPreview,"/root/wawawawawa/ccc.mp4")
         }
     }
     */
+
+    //保存添加水印的视频
+    FileDialog{
+        id:_savewater
+        title: "Save your cut video which has be added watermark"
+        currentFolder:StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+        fileMode:FileDialog.SaveFile
+        nameFilters:[ "Audio files (*.mp4 *.mov *.avi *.mkv *.mp3 *.wav *.flac *.ogg)" ]
+        onAccepted: {
+            outputPath = selectedFile.toString().replace("file://", "")
+            console.log("输出文件路径:", outputPath)
+            watermark.addTextWatermarkToVideo(inputPathPreview,outputPath,_watermark.text,_watermark.color,_watermark.size,_watermark.alpha)
+
+        }
+    }
+
+
+    //保存合并的视频
+    /*
+ //    FileDialog{
+ //        id:_fixedsave
+ //        title: "Save your cut video"
+ //        currentFolder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/wawawawawa" // 固定目录
+ //        fileMode:FileDialog.SaveFile
+ //        nameFilters:[ "Audio files (*.mp4 *.oop *.avi *.wav)" ]
+ //        onAccepted: {
+ //            //默认输出路径
+
+ //            // 确保目录存在（如果不存在则创建）
+ //            var fixedFolder = StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/wawawawawa";
+ //            var directory = Qt.createQmlObject('import QtQuick 2.0; Item {}', parent);
+ //            var folder = Qt.resolvedUrl(fixedFolder);
+ //            var file = new XMLHttpRequest();
+ //            file.open("HEAD", folder, false);
+ //            file.send();
+
+ //            if (file.status !== 200) {
+ //                // 创建目录
+ //                var createFolderCommand = "mkdir -p \"" + fixedFolder + "\"";
+ //                Qt.callLater(function() {
+ //                    Qt.openUrlExternally("sh", "-c " + createFolderCommand);
+ //                });
+ //            }
+
+ //            // 固定输出路径
+ //            outputPath = fixedFolder + "/output.mp4"; // 固定文件名
+ //            console.log("输出文件路径:", outputPath);
+
+ //            // 模拟保存操作（实际可能需要调用 C++ 函数）
+ //            // 这里假设保存成功，直接更新播放器源
+ //            oneplayer.mplay.source = outputPath;
+ //            oneplayer.mplay.play();
+
+ //            console.log("输出文件路径:", outputPath)
+ //        }
+
+ //    }
+*/
 
     // savevideofile
     FileDialog{
@@ -147,9 +216,9 @@ Item {
         nameFilters:[ "Audio files (*.mp4 *.mov *.avi *.mkv *.wav)" ]
         onAccepted: {
             outputPath = selectedFile.toString().replace("file://", "")
-            vimu.replaceAudio(content.inputPath1,audioOutputPath,outputPath)
+            vimu.replaceAudio(content.inputPathPreview,audioOutputPath,outputPath)
             //result.text = success ? "成功！" : "失败！"
-            console.log(content.inputPath1)
+            console.log(content.inputPathPreview)
             console.log(audioOutputPath)
             console.log(outputPath)
         }
@@ -178,6 +247,22 @@ Item {
         onAccepted: {
             _twoPlay.source = _openAddV.selectedFile
             _twoPlay.play()
+        }
+    }
+
+    //合并两个视频的保存
+    FileDialog{
+        id:_savemergerfile
+        title: "Save your merger video"
+        currentFolder:StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+        fileMode:FileDialog.SaveFile
+        nameFilters:[ "Audio files (*.mp4 *.oop *.avi *.wav)" ]
+        onAccepted: {
+            outputPath = selectedFile.toString().replace("file://", "")
+            console.log("输出文件路径:", outputPath)
+            console.log("第一个视频：",content.mergePath1)
+            console.log("第一个视频：",content.mergePath2)
+            vm.mergeVideos(content.mergePath1,content.mergePath2,outputPath)
         }
     }
 
