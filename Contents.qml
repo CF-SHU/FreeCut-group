@@ -515,7 +515,7 @@ Item {
         Rectangle{
             id:bottomRect
             Layout.fillWidth: true
-            Layout.preferredHeight: parent.height * 0.4 // 下半部分占50%高度
+            Layout.preferredHeight: parent.height * 0.4 // 下半部分占40%高度
             //color:"#43074f"
             // gradient: Gradient {
             //         GradientStop { position: 0.2; color: "#2a0132" }
@@ -987,9 +987,9 @@ Item {
                                    spacing: 5
                                    Layout.fillWidth: true
 
-                                   Text {
+                                    Text {
                                        text: qsTr("移动模式:")
-                                       font.pixelSize: 14
+                                        font.pixelSize: 14
                                        anchors.verticalCenter: parent.verticalCenter
                                    }
 
@@ -1124,6 +1124,79 @@ Item {
                         _savepip.open()
                         successTimer.start()
                     }
+                }
+            }
+            //可以直接点击播放已剪辑好的视频
+            Rectangle{
+                id:savevideo
+                width: parent.width
+                height: parent.height / 3
+                anchors.left: parent.left
+                anchors.top: merge.bottom
+                anchors.topMargin: parent.height / 8
+                gradient: Gradient {
+                        GradientStop { position: 0.3; color: "#2a0132" }
+                        GradientStop { position: 0.8; color: "black" }
+                    }
+                ListView{
+                    id:saveVideoView
+                    anchors.fill:parent
+                    orientation: ListView.Horizontal
+                    spacing:5
+
+                    ScrollBar.horizontal: ScrollBar {
+                        policy: ScrollBar.AlwaysOn
+                    }
+
+                    model:oneplayer.savemodel
+
+                    //delegate
+                    delegate:Rectangle{
+                        id:rec1
+                        width:savevideo.width / 10
+                        height:savevideo.height
+                        border.color: "lightblue"
+                        radius: 5 //添加圆角半径
+                        color:{
+                            if (currentPlayingIndex === index) {
+                                return "lightblue" // 播放状态颜色
+                            } else {
+                                index % 2 === 0 ? "#302d2c" : "white"
+                            }
+                        }
+                        //视频第一帧显示
+                        Video {
+                            id:_vvvv1
+                            anchors.fill: parent
+                            source: model.filepath
+                            autoPlay: true
+                            muted: true
+                            loops: MediaPlayer.Infinite
+                            onPlaybackStateChanged: {
+                                seek(100)
+                                pause()
+                            }
+                        }
+
+                        //单击素材播放，双击素材暂停
+                        TapHandler {
+                            onTapped: {
+                                content.currentPlayingIndex = index
+                                console.log("now music index & currentPlayingIndex is ",index,content.currentPlayingIndex)
+                                oneplayer.mplay.source = model.filepath
+                                console.log("保存的文件路径：",model.filepath)
+                                oneplayer.mplay.play()
+                            }
+                        }
+                        // 添加颜色过渡动画
+                        Behavior on color {
+                            ColorAnimation { duration: 1000 }
+                        }
+                    }
+                    //添加动画
+                    add: Transition {
+                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 2000 }
+                    }//透明度动画
                 }
             }
 

@@ -20,6 +20,7 @@ Item {
     property alias mSlider:_slider // 预览窗口时间轴 Slider
     property alias watermark:_watermark//水印
     property alias savewater:_savewater
+    property alias savemodel:_savemodel
     property string inputPath: ""
     property string outputPath: "/root/output.mp4"
     property string audioOutputPath: ""
@@ -29,6 +30,10 @@ Item {
     }
     VideoMerger{
         id:vm
+    }
+
+    ListModel{
+        id:_savemodel
     }
 
     //mplay，用于预览窗口播放素材的实例化
@@ -100,7 +105,7 @@ Item {
         }
     }
 
-    //openfile
+    //打开文件导入素材
     FileDialog{
         id:_openfile
         title: "Select some videos"
@@ -127,7 +132,12 @@ Item {
             outputPath = selectedFile.toString().replace("file://", "")
             console.log("输出文件路径:", outputPath)
             Controller.deletefile("/root/wawawawawa")
+            const fileName1 = selectedFile.toString().split('/').pop().replace(/\.[^/.]+$/, "")
             Controller.processCut(inputPathPreview,outputPath)
+            savemodel.append({
+                filepath:selectedFile,
+                filename:fileName1,
+                             })
         }
     }
 
@@ -159,8 +169,12 @@ Item {
         onAccepted: {
             outputPath = selectedFile.toString().replace("file://", "")
             console.log("输出文件路径:", outputPath)
+            const fileName1 = selectedFile.toString().split('/').pop().replace(/\.[^/.]+$/, "")
             watermark.addTextWatermarkToVideo(inputPathPreview,outputPath,_watermark.text,_watermark.color,_watermark.size,_watermark.alpha)
-
+            savemodel.append({
+                filepath:selectedFile,
+                filename:fileName1,
+                             })
         }
     }
 
@@ -207,7 +221,7 @@ Item {
  //    }
 */
 
-    // savevideofile
+    // 保存替换了音频的视频
     FileDialog{
         id:_savevideofile
         title: "Save your cut video"
@@ -216,11 +230,16 @@ Item {
         nameFilters:[ "Audio files (*.mp4 *.mov *.avi *.mkv *.wav)" ]
         onAccepted: {
             outputPath = selectedFile.toString().replace("file://", "")
+            const fileName1 = selectedFile.toString().split('/').pop().replace(/\.[^/.]+$/, "")
             vimu.replaceAudio(content.inputPathPreview,audioOutputPath,outputPath)
             //result.text = success ? "成功！" : "失败！"
             console.log(content.inputPathPreview)
             console.log(audioOutputPath)
             console.log(outputPath)
+            savemodel.append({
+                filepath:selectedFile,
+                filename:fileName1,
+                             })
         }
     }
 
@@ -263,6 +282,11 @@ Item {
             console.log("第一个视频：",content.mergePath1)
             console.log("第一个视频：",content.mergePath2)
             vm.mergeVideos(content.mergePath1,content.mergePath2,outputPath)
+            const fileName1 = selectedFile.toString().split('/').pop().replace(/\.[^/.]+$/, "")
+            savemodel.append({
+                filepath:selectedFile,
+                filename:fileName1,
+                             })
         }
     }
 

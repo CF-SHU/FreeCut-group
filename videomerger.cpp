@@ -1,10 +1,7 @@
 #include "videomerger.h"
 #include <qdebug.h>
 
-VideoMerger::VideoMerger(QObject *parent) : QObject{parent}
-{
-    m_process = new QProcess(this);
-}
+VideoMerger::VideoMerger(QObject *parent) : QObject{parent}{}
 
 void VideoMerger::mergeVideos(const QString &inputPath1, const QString &inputPath2, const QString &outputPath)
 {
