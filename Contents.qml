@@ -836,62 +836,165 @@ Item {
                        inputDialog.open();
                     }
                 }
+                // 提示信息
+                Text {
+                    id: statusText
+                    anchors.top: addwatermark.bottom  // 将提示信息定位在 addwatermark 的下方
+                    anchors.horizontalCenter: addwatermark.horizontalCenter  // 水平居中
+                    text: ""
+                    color: "green"
+                    font.pixelSize: 14
+                    visible: false
+                }
+                // 用于隐藏提示信息的定时器
+                Timer {
+                    id: hideStatusTimer
+                    interval: 3000 // 3秒
+                    onTriggered: {
+                        statusText.visible = false;
+                    }
+                }
                 //用户点击“添加水印”按钮后，Popup对话框将打开。
                // 用户在TextField中输入水印文本。
                // 用户点击“确定”按钮后，输入的文本将传递给_watermark.text，对话框关闭。
                 Popup {
-                       id: inputDialog
-                       width: 200
-                       height: 100
-                       modal: true
-                       focus: true
-                       closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
+                    id: inputDialog
+                    width: 200
+                    height: 100
+                    modal: true
+                    focus: true
+                    closePolicy: Popup.CloseOnEscape | Popup.CloseOnPressOutside
 
-                       ColumnLayout {
-                           anchors.fill: parent
-                           spacing: 10
+                    ScrollView {
+                        anchors.fill: parent
+                        contentWidth: parent.width
+                        contentHeight: columnLayout.height
 
-                           TextField {
-                               id: textInput
-                               placeholderText: qsTr("输入水印文本")
-                               Layout.fillWidth: true
-                           }
-                           ComboBox
-                           {
-                                id: colorInput
-                                model: ["white", "red", "green", "blue","black"]
+                        ColumnLayout {
+                            anchors.fill: parent
+                            spacing: 10
+
+                            TextField {
+                                id: textInput
+                                placeholderText: qsTr("输入水印文本")
                                 Layout.fillWidth: true
+                                // 可选：自定义placeholderText的颜色
+                                placeholderTextColor: "gray"
+
+                                // 监听文本变化
+                                onTextChanged: {
+                                    if (text === "") {
+                                        // 文本为空时，placeholderText会自动显示
+                                    }
+                                }
                             }
 
-                            SpinBox
-                            {
-                                id: sizeInput
-                                from: 10
-                                to: 72
-                                value: 24
+                            RowLayout {
+                                spacing: 5
                                 Layout.fillWidth: true
+
+                                Text {
+                                    text: qsTr("颜色:")
+                                    font.pixelSize: 14
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+
+                                ComboBox
+                                {
+                                     id: colorInput
+                                     model: ["white", "red", "green", "blue","black","purple","pink","yellow","orange"]
+                                     Layout.fillWidth: true
+                                 }
                             }
-                           Button {                               
-                               text: qsTr("确定")
-                               Layout.alignment: Qt.AlignRight
-                               onClicked: {
-                                    var customText = textInput.text;
-                                    var customColor = colorInput.currentText;
-                                    var customSize = sizeInput.value;
+                            RowLayout {
+                                spacing: 5
+                                Layout.fillWidth: true
 
-                                    // 将参数传递给 oneplayer.watermark
-                                    oneplayer.watermark.text = customText;
-                                    oneplayer.watermark.color = customColor;
-                                    oneplayer.watermark.size = customSize;
-                                    inputDialog.close();
+                                Text {
+                                    text: qsTr("透明度:")
+                                    font.pixelSize: 14
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                ComboBox
+                                {
+                                     id: alphaInput
+                                     model: ["0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"]
+                                     Layout.fillWidth: true
+                                 }
+                            }
+                            RowLayout {
+                                spacing: 5
+                                Layout.fillWidth: true
 
-                                   //选择文件路径保存加上水印的视频
-                                   //保存的时候将输出路径传给添加水印的函数，将水印添加到视频中
-                                   oneplayer.savewater.open();
-                               }
-                           }
-                       }
-                   }
+                                Text {
+                                    text: qsTr("字体大小:")
+                                    font.pixelSize: 14
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
+                                 SpinBox
+                                 {
+                                     id: sizeInput
+                                     from: 10
+                                     to: 72
+                                     value: 24
+                                     Layout.fillWidth: true
+                                 }
+                            }
+                            RowLayout {
+                                   spacing: 5
+                                   Layout.fillWidth: true
+
+                                   Text {
+                                       text: qsTr("移动模式:")
+                                       font.pixelSize: 14
+                                       anchors.verticalCenter: parent.verticalCenter
+                                   }
+
+                                   ComboBox {
+                                       id: movementModeInput
+                                       model: [
+                                           qsTr("水平移动"),
+                                           qsTr("上下移动"),
+                                           qsTr("对角线移动"),
+                                           qsTr("固定不变")
+                                       ]
+                                       currentIndex: 0  // 默认选择第一个选项
+                                       Layout.fillWidth: true
+                                   }
+                             }
+                            Button {
+                                text: qsTr("确定")
+                                Layout.alignment: Qt.AlignRight
+                                onClicked: {
+                                     var customText = textInput.text;
+                                     var customColor = colorInput.currentText;
+                                     var customSize = sizeInput.value;
+                                    var customAlpha = parseFloat(alphaInput.currentText);
+
+                                     // 将参数传递给 oneplayer.watermark
+                                     oneplayer.watermark.text = customText;
+                                     oneplayer.watermark.color = customColor;
+                                     oneplayer.watermark.size = customSize;
+                                    oneplayer.watermark.alpha = customAlpha;
+
+                                     inputDialog.close();
+
+                                    // 连接 watermarkAdded 信号
+                                       oneplayer.watermark.watermarkAdded.connect(function() {
+                                           statusText.text = qsTr("水印添加成功！");
+                                           statusText.visible = true;
+                                            hideStatusTimer.start(); // 启动定时器
+                                       });
+
+                                    //选择文件路径保存加上水印的视频
+                                    //保存的时候将输出路径传给添加水印的函数，将水印添加到视频中
+                                    oneplayer.savewater.open();
+                                }
+                            }
+                        }
+                    }
+
+             }
 
             }
         }

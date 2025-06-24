@@ -33,27 +33,39 @@ void Watermark::addTextWatermarkToVideo(const QString &inputFile,
                                         const QString &outputFile,
                                         const QString &watermarkText,
                                         const QString &color,
-                                        const int &size)
+                                        const int &size,
+                                        const double &alpha)
 {
     QProcess ffmpeg;
     QStringList args;
 
+    // 设置环境变量
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    env.insert("PATH", "/usr/local/bin:/usr/bin:/bin");
+    env.insert("LD_LIBRARY_PATH", "/usr/local/lib:/usr/lib");
+
+    // 设置DISPLAY变量（Linux必需）
+    if (!env.contains("DISPLAY")) { env.insert("DISPLAY", ":0"); }
+    ffmpeg.setProcessEnvironment(env);
+
     args << "-i" << inputFile;
     args << "-vf"
-         << QString("drawtext=text='%1':x=mod(n\\, w)/2:y=mod(n\\, h)/10:fontsize=%2:fontcolor=%3:alpha=0.7")
+         << QString("drawtext=text='%1':x=mod(n\\, w)/2:y=mod(n\\, h)/10:fontsize=%2:fontcolor=%3:alpha=%4")
                 .arg(watermarkText)
                 .arg(size)
-                .arg(color);
+                .arg(color)
+                .arg(alpha, 0, 'f', 1); // 浮点数，保留一位小数
 
-    //args << "-vf" << QString("drawtext=text='%1':x=10:y=10:fontsize=24:fontcolor=white:alpha=0.7").arg(watermarkText);
-    //args << "-c:v" << "libx264"; // 使用H.264编解码器
-    // args << "-c:a" << "aac";     // 使用AAC音频编解码器
-    // args << "-preset" << "fast"; // 编码速度和压缩率的平衡
-    // args << "-crf" << "23";      // 控制视频质量
     args << outputFile;
+
+    // 打印完整的命令
+    qDebug() << "FFmpeg command: ffmpeg" << args.join(" ");
 
     ffmpeg.start("ffmpeg", args);
     ffmpeg.waitForFinished(); // 等待FFmpeg完成
+
+    // 发出信号，通知水印添加完成
+    emit watermarkAdded();
 }
 
 QString Watermark::text() const
@@ -94,6 +106,19 @@ void Watermark::setSize(int size)
     if (m_size != size) {
         m_size = size;
         emit sizeChanged();
+        update();
+    }
+}
+double Watermark::alpha() const
+{
+    return m_alpha;
+}
+
+void Watermark::setAlpha(double alpha)
+{
+    if (m_alpha != alpha) {
+        m_alpha = alpha;
+        emit alphaChanged();
         update();
     }
 }

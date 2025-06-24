@@ -61,11 +61,7 @@ Item {
     }
     Watermark{
         id:_watermark
-            anchors.fill: parent
-            text: "Sample Watermark"
-            color:"white"
-            size:26
-            position: Qt.point(50, 50) // 初始位置
+        position: Qt.point(50, 50) // 初始位置
         }
     //musicplay
     MediaPlayer{
@@ -161,7 +157,7 @@ Item {
         onAccepted: {
             outputPath = selectedFile.toString().replace("file://", "")
             console.log("输出文件路径:", outputPath)
-            watermark.addTextWatermarkToVideo(inputPathPreview,outputPath,_watermark.text,_watermark.color,_watermark.size)
+            watermark.addTextWatermarkToVideo(inputPathPreview,outputPath,_watermark.text,_watermark.color,_watermark.size,_watermark.alpha)
 
         }
     }
