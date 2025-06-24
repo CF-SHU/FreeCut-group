@@ -8,10 +8,11 @@ import QtCore
 import Videoclips 1.0
 
 Item {
-    property alias dialog:_dialog//
+    property alias dialog:_dialog
     property int currentPlayingIndex: -1
     property alias mplay:_mplayer //素材视频/音频的播放
     property string inputPathPreview: ""
+    property string outputPathPip:""
     property var videoCPath: [" ", " ", " "," "," "]
     property var videoQPath: [" ", " ", " "," "," "]
     property int a: 0
@@ -56,6 +57,28 @@ Item {
             //noti.notification.show(noti.text)
             //这里需要优化，剪切0秒时提示错误❌
             //剪切视频提示，调用Notification.qml
+        }
+    }
+
+    //画中画
+    VideoPip{
+        id:pipper
+        onProcessingFinished: {
+            console.log("视频处理完成:", outputPath)
+            // 显示成功提示
+            successText.text = "保存成功！"
+            successText.color = "green"
+            yes.successText.visible = true
+            yes.successTimer.restart() // 启动定时器显示成功
+        }
+
+        onProcessingError: {
+            console.error("处理错误:", errorMessage)
+            // 显示错误提示
+            yes.successText.text = "保存失败: " + errorMessage
+            yes.successText.color = "red"
+            yes.successText.visible = true
+            yes.successTimer.restart()
         }
     }
 
@@ -151,13 +174,11 @@ Item {
                                 }
                             }
                         }
-
                         // 添加颜色过渡动画
                         Behavior on color {
                             ColorAnimation { duration: 1000 }
                         }
                     }
-
                     //添加动画
                     add: Transition {
                         NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 2000 }
@@ -237,6 +258,7 @@ Item {
                 Layout.preferredHeight: left.height
                 color:"black"
                 border.color:"black"
+                clip: true // 确保子元素-addVideo矩形不会超出边界显示
                 // 添加一个属性来控制select按钮的可见性
                 property bool showSelectButton: true
 
@@ -244,7 +266,6 @@ Item {
                 Player{
                     id:oneplayer
                 }
-
                 ToolBar
                 {
                     RowLayout
@@ -262,7 +283,7 @@ Item {
                         }
                     }
                 }
-                //打开素材列表按钮
+                //打开素材列表按钮:添加素材
                 Button
                 {
                     id:select
@@ -381,6 +402,7 @@ Item {
                                         inputPathPreview = model.filePath.toString().replace("file://", "") // 视频路径传给后端C++函数实现预览
                                     }
                                 }
+
                                 // 添加颜色过渡动画
                                 Behavior on color {
                                     ColorAnimation { duration: 1500 }
@@ -393,51 +415,63 @@ Item {
                             }//透明度动画
                         }
                     }
+                    }
+                //add画中画窗口
+                Rectangle {
+                    id: addVideo
+                    visible: false
+                    width: parent.width / 4
+                    height: parent.height / 4
+                    x:100
+                    y:100
+                    color: "transparent"
+
+                    MediaPlayer {
+                        id: _twoPlay
+                        videoOutput: addOut
+                        onMediaStatusChanged: {
+                            if (mediaStatus === MediaPlayer.EndOfMedia) {
+                                addVideo.visible = false
+                            }
+                        }
+                    }
+
+                    VideoOutput {
+                        id: addOut
+                        anchors.fill: parent
+                        fillMode: VideoOutput.PreserveAspectFit // 保持比例
+                    }
+
+                    DragHandler {
+                        id: dragHandler
+                        target: addVideo
+                        onActiveChanged: {
+                            if (!active) {
+                                // 记录位置信息
+                                console.log("x,y pg rightRec",rightRect.x,rightRect.y)
+                                addVideo.x = Math.max(0,Math.min(addVideo.x, rightRect.width-addVideo.width))
+                                addVideo.y = Math.max(0,Math.min(addVideo.y, rightRect.height-addVideo.height))
+                                console.log("x,y 12345:",addVideo.x,addVideo.y)
+                            }
+                        }
+                    }
+
+                    // 拖动提示
+                    Text {
+                        anchors {
+                            top: parent.top
+                            horizontalCenter: parent.horizontalCenter
+                            topMargin: 10
+                        }
+                        text: "可拖动!"
+                        color: "white"
+                        font.pixelSize: 12
+                        font.italic: true
+                        opacity: 0.8
+                    }
                 }
+
             }
-            /**什么合并的玩意？
-            // // 时间轴 Slider
-            //    Slider {
-            //        id: slider
-            //        anchors.bottom: parent.bottom
-            //        anchors.horizontalCenter: parent.horizontalCenter
-            //        width: parent.width - 40 // 留出一些边距
-            //        from: 0
-            //        to: _mplay.duration > 0 ? _mplay.duration : 1000 // 默认值为 1000 毫秒（1 秒），避免为 0
-            //        value: _mplay.position
-            //        stepSize: 1000 // 步长为 1 秒
-
-            //        // 当用户拖动 Slider 时，跳转到视频的相应位置
-            //        onValueChanged: {
-            //            if (pressed) { // 仅在用户拖动滑块时更新
-            //                console.log("Slider value changed to:", value); // 调试输出
-            //                _mplay.position = value; // 使用 position 属性跳转
-            //            }
-            //        }
-            //    }
-
-            //    // 显示当前时间和总时长
-            //    Row {
-            //        anchors.bottom: slider.top
-            //        anchors.horizontalCenter: parent.horizontalCenter
-            //        spacing: 10
-
-            //        Text {
-            //            text: Controller.formatTime(_mplay.position)
-            //            color: "white"
-            //        }
-
-            //        Text {
-            //            text: "/"
-            //            color: "white"
-            //        }
-
-            //        Text {
-            //            text: Controller.formatTime(_mplay.duration)
-            //            color: "white"
-            //        }
-            //    }
-            */
         }
 
 
@@ -468,7 +502,6 @@ Item {
                     }
                 }
             }
-
             // 显示当前时间和总时长
             Row {
                 anchors.bottom: slider2.top
@@ -481,6 +514,7 @@ Item {
                 }
             }
 
+            //剪切等按钮
             Rectangle {
                 id:pinkCut
                 width:parent.width / 6
@@ -605,6 +639,8 @@ Item {
                     //button6:继续剪切：确认 | 退出
                     Button {
                         id: button6
+                        width: button1.width
+                        height: button1.height
                         text:qsTr("单击确认 | 双击退出")
                         visible: currentButton === 6
                         property bool isDoubleClicked: false
@@ -679,7 +715,7 @@ Item {
                     }
                 }
             }
-
+            //音频等按钮
             Rectangle{
                 id:musicCut
                 width:parent.width / 4
@@ -689,6 +725,7 @@ Item {
                 anchors.leftMargin: 10
                 color: "white"
                 radius: 5
+                //原声
                 Row{
                     id:row
                     width: parent.width /2
@@ -714,6 +751,7 @@ Item {
                        }
                     }
                 }
+                //插入音频
                 RadioButton{
                     id:music
                     anchors.bottom: cutaudio.bottom
@@ -727,18 +765,18 @@ Item {
                 }
                 //导出视频
                 RadioButton{
-                   id:ouput
-                   anchors.bottom: cutaudio.bottom
-                   height: parent.height
-                   width: parent.width / 4
-                   anchors.left:music.right
-                   text:"导出视频"
-                   onClicked: {
-                       oneplayer.savevideofile.open()
-                   }
+                    id:ouput
+                    anchors.bottom: cutaudio.bottom
+                    height: parent.height
+                    width: parent.width / 4
+                    anchors.left:music.right
+                    text:"导出视频"
+                    onClicked: {
+                        oneplayer.savevideofile.open()
+                    }
                 }
-
             }
+            //合并视频按钮
             Rectangle{
                 id:merge
                 width:parent.width / 6
@@ -751,19 +789,102 @@ Item {
                 anchors.top: musicCut.top
                 anchors.leftMargin: 10
                 Button{
-                  id:mer1
-                  text:"选择要合并的视频"
-                  width: parent.width
-                  height: parent.height
-                  highlighted: true
-                  onClicked: {
-                    dialog2.open()
-                    mer2.z = 2
-                  }
+                    id:mer1
+                    text:"选择要合并的视频"
+                    width: parent.width
+                    height: parent.height
+                    highlighted: true
+                    onClicked: {
+                        dialog2.open()
+                        mer2.z = 2
+                    }
                 }
             }
+            //画中画按钮
+            Rectangle{
+                id:addVideoButton
+                width:parent.width / 6
+                height: parent.height / 8
+                color: "white"
+                border.color: "gray"
+                border.width: 3
+                radius: 5
+                anchors.left: merge.right
+                anchors.top: merge.top
+                anchors.leftMargin: 10
+                property int currentButton: 1
+                Button{
+                    id:addV
+                    visible: currentButton === 1
+                    text:"添加画中画"
+                    width: parent.width
+                    height: parent.height
+                    highlighted: true
+                    onClicked: {
+                        oneplayer.openAddV.open()
+                        addVideo.visible = true
+                        currentButton = 2
+                    }
+                }
+                Button{
+                    id:yes
+                    visible: currentButton === 2
+                    text:"确认画中画位置并保存"
+                    width: parent.width
+                    height: parent.height
+                    //提示文本
+                    Text {
+                        id: successText
+                        font.pixelSize: 14
+                        anchors.bottom: parent.bottom
+                        text:""
+                        visible: false
+                    }
+                    //保存画中画视频
+                    FileDialog{
+                        id:_savepip
+                        title: "Save your pip video"
+                        currentFolder:StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+                        fileMode:FileDialog.SaveFile
+                        nameFilters:[ "Audio files (*.mp4 *.mov *.avi *.mkv *.wav)" ]
+                        onAccepted: {
+                            outputPathPip = selectedFile.toString().replace("file://", "")
+                            console.log("输出文件路径:", outputPathPip)
+                            let pipVideoPath = _twoPlay.source.toString().replace("file://", "")
+                            let pipDuration = _twoPlay.duration/1000
+                        //     // 转换位置和尺寸
+                        //     const convertedPos = Controller.convertPosition(rightRect, _twoPlay, addVideo.x, addVideo.y)
+                        //     const pipSize = Controller.convertSize(rightRect, _twoPlay, addVideo.width, addVideo.height)
 
-    }
+                        //     pipper.videoInsertPip(
+                        //         inputPathPreview,
+                        //         pipVideoPath,
+                        //         outputPathPip,
+                        //         pipDuration,
+                        //         convertedPos.x,
+                        //         convertedPos.y,
+                        //         pipSize.width,
+                        //         pipSize.height
+                        //     )
+                        // }
+                            pipper.videoInsertPip(inputPathPreview,pipVideoPath,outputPathPip,pipDuration,addVideo.x,addVideo.y)
+                        }
+                    }
+                    Timer{
+                        id:successTimer
+                        interval:2000
+                        onTriggered:{
+                            successText.visible = false;
+                            currentButton = 1
+                        }
+                    }
+                    onClicked: {
+                        _savepip.open()
+                        successTimer.start()
+                    }
+                }
+            }
+        }
 
         Actions{
             id:act

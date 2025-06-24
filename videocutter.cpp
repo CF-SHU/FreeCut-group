@@ -10,7 +10,6 @@
 #include <QDateTime>
 #include <qdir.h>
 #include <cstdio>
-#include <iostream>
 
 VideoCutter::VideoCutter(QObject *parent) : QObject(parent), m_process(nullptr) {}
 
@@ -238,7 +237,7 @@ bool VideoCutter::savefile(const QString &inputPath, const QString &outputPath)
 
     // 检查命令执行是否成功
     if (returnCode != 0) {
-        std::cerr << "Error: Failed to execute ffmpeg command. Return code: " << returnCode << std::endl;
+        qDebug() << "Error: Failed to execute ffmpeg command. Return code: " << returnCode;
         return false;
     }
 

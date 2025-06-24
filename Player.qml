@@ -10,27 +10,23 @@ Item {
     anchors.fill: parent
     property alias openfile:_openfile
     property alias saveCut: _saveCut
-    property alias saveSomeCut: _saveSomeCut //暂时没什么用
+    //property alias saveSomeCut: _saveSomeCut //暂时没什么用
     property alias openmusic:_openmusic
+    property alias openAddV: _openAddV //画中画添加
     property alias savevideofile:_savevideofile
-    property alias savemergerfile:_savemergerfile
     property alias about: _about
     property alias mplay:_mplay
+    //property alias twoPlay: _twoPlay
     property alias musicplay:_musicplay
-    property alias vi:_vi
     property alias mSlider:_slider // 预览窗口时间轴 Slider
     property string inputPath: ""
     property string outputPath: "/root/output.mp4"
     property string audioOutputPath: ""
-   // property alias fixedsave:_fixedsave
 
     VideoMusic{
         id:vimu
     }
-    VideoSegmentMerger{
-        id:_vi
-    }
-    //mplay
+    //mplay，用于预览窗口播放素材的实例化
     MediaPlayer{
         id:_mplay
         videoOutput:out
@@ -56,7 +52,8 @@ Item {
         id:out
         anchors.fill:parent
     }
-    //musicplay
+
+    //musicplay,打开音乐按钮的播放
     MediaPlayer{
         id:_musicplay
         audioOutput: AudioOutput{}
@@ -119,11 +116,12 @@ Item {
             outputPath = selectedFile.toString().replace("file://", "")
             console.log("输出文件路径:", outputPath)
             Controller.deletefile("/root/wawawawawa")
-            Controller.processCut(inputPath1,outputPath)
+            Controller.processCut(inputPathPreview,outputPath)
         }
     }
 
     //保存多次剪切的视频
+    /*
     FileDialog{
         id:_saveSomeCut
         title: "Save your cut video"
@@ -138,48 +136,7 @@ Item {
             Controller.processCut(inputPath1,"/root/wawawawawa/ccc.mp4")
         }
     }
-
-
-
-    //保存合并的视频
- //    FileDialog{
- //        id:_fixedsave
- //        title: "Save your cut video"
- //        currentFolder: StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/wawawawawa" // 固定目录
- //        fileMode:FileDialog.SaveFile
- //        nameFilters:[ "Audio files (*.mp4 *.oop *.avi *.wav)" ]
- //        onAccepted: {
- //            //默认输出路径
-
- //            // 确保目录存在（如果不存在则创建）
- //            var fixedFolder = StandardPaths.writableLocation(StandardPaths.DocumentsLocation) + "/wawawawawa";
- //            var directory = Qt.createQmlObject('import QtQuick 2.0; Item {}', parent);
- //            var folder = Qt.resolvedUrl(fixedFolder);
- //            var file = new XMLHttpRequest();
- //            file.open("HEAD", folder, false);
- //            file.send();
-
- //            if (file.status !== 200) {
- //                // 创建目录
- //                var createFolderCommand = "mkdir -p \"" + fixedFolder + "\"";
- //                Qt.callLater(function() {
- //                    Qt.openUrlExternally("sh", "-c " + createFolderCommand);
- //                });
- //            }
-
- //            // 固定输出路径
- //            outputPath = fixedFolder + "/output.mp4"; // 固定文件名
- //            console.log("输出文件路径:", outputPath);
-
- //            // 模拟保存操作（实际可能需要调用 C++ 函数）
- //            // 这里假设保存成功，直接更新播放器源
- //            oneplayer.mplay.source = outputPath;
- //            oneplayer.mplay.play();
-
- //            console.log("输出文件路径:", outputPath)
- //        }
-
- //    }
+    */
 
     // savevideofile
     FileDialog{
@@ -211,19 +168,16 @@ Item {
             audioOutputPath = selectedFile.toString().replace("file://", "")
         }
     }
-
-    //合并两个视频的保存
+    //添加画中画,只能添加一个文件
     FileDialog{
-        id:_savemergerfile
-        title: "Save your merger video"
-        currentFolder:StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
-        fileMode:FileDialog.SaveFile
-        nameFilters:[ "Audio files (*.mp4 *.oop *.avi *.wav)" ]
+        id:_openAddV
+        title: "Select videos"
+        currentFolder: StandardPaths.standardLocations(StandardPaths.DocumentsLocation)[0]
+        fileMode: FileDialog.OpenFile
+        nameFilters: ["Video files(*mp4 *.mov *.avi *.mkv *.wav)"]
         onAccepted: {
-            //outputPath = "/root/output.mp4"
-            outputPath = selectedFile.toString().replace("file://", "")
-            console.log("输出文件路径:", outputPath)
-            vi.mergeTwoSegments(content.videoCPath[0],content.fromTimes[0],content.toTimes[0],content.videoCPath[1],content.fromTimes[1],content.toTimes[1],outputPath)
+            _twoPlay.source = _openAddV.selectedFile
+            _twoPlay.play()
         }
     }
 
