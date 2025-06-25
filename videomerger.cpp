@@ -1,5 +1,6 @@
 #include "videomerger.h"
-#include <qdebug.h>
+#include <QDebug>
+#include <QProcess>
 
 VideoMerger::VideoMerger(QObject *parent) : QObject{parent}{}
 
@@ -39,10 +40,10 @@ void VideoMerger::mergeVideos(const QString &inputPath1, const QString &inputPat
             "[outa]",
             outputPath};
 
-    qDebug() << "inputPath1:" << inputPath1;
-    qDebug() << "inputPath2:" << inputPath2;
-    qDebug() << "outputPath:" << outputPath;
-    qDebug() << "执行FFmpeg命令:" << "ffmpeg" << args;
+    // qDebug() << "inputPath1:" << inputPath1;
+    // qDebug() << "inputPath2:" << inputPath2;
+    // qDebug() << "outputPath:" << outputPath;
+    // qDebug() << "执行FFmpeg命令:" << "ffmpeg" << args;
     m_process->start("ffmpeg", args);
     m_process->waitForFinished();
 }

@@ -33,7 +33,7 @@ function deletefile(filepath)
     cutter.deletedir(filepath)
 }
 
-/**转换尺寸，暂时不需要
+/**转换尺寸，暂时没有用到
 //add画中画尺寸处理
 function convertPip(previewItem,videoItem,x,y){
     //获取预览尺寸
@@ -120,3 +120,11 @@ function convetPreVideo(RectItem,videoItem){
 // {
 //     cutter.movefile("/root/wawawawawa/ccc.mp4",outputPath)
 // }
+
+// 计算字体大小的函数
+function calculateFontSize(select)
+{
+   // 使用按钮的最小尺寸来计算字体大小
+   var minSize = Math.min(select.width, select.height) *0.15; // 15% 的按钮尺寸
+   return Math.max(12, minSize); // 确保字体大小不小于 12
+}

@@ -1,3 +1,4 @@
+//Player.qml
 import QtQuick
 import QtQuick.Dialogs
 import QtCore
@@ -213,6 +214,7 @@ Item {
             savemodel.append({
                 filepath:selectedFile,
                 filename:fileName1,
+                filecpath:outputPath
             })
         }
     }
@@ -278,6 +280,7 @@ Item {
             savemodel.append({
                 filepath:selectedFile,
                 filename:fileName1,
+                filecpath:outputPath
             })
         }
     }
@@ -325,7 +328,8 @@ Item {
             savemodel.append({
                 filepath:selectedFile,
                 filename:fileName1,
-                             })
+                filecpath:outputPath
+            })
         }
     }
 

@@ -1,3 +1,5 @@
+//Contents.qml
+
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -15,16 +17,18 @@ Item {
     property alias mplay:_mplayer //素材视频/音频的播放
     property string inputPathPreview: ""
     property string outputPathPip:""//画中画输出路径（用户自定义
+    /*
     // property var preVideoX //画中画功能设置的Property,是预览窗口视频的实际宽度起点
     // property var preVideoY //画中画功能设置的Property,是预览窗口视频的实际高度起点
     // property var preVideoWidth //画中画功能设置的Property,是预览窗口视频的实际宽度
     // property var preVideoHeight //画中画功能设置的Property,是预览窗口视频的实际高度
+*/
     property double scalePip: 0 //画中画背景视频的缩放比例
-    property var videoCPath: [" ", " ", " "," "," "]
-    property var videoQPath: [" ", " ", " "," "," "]
+    property string videoCPath: ""//剪辑后的视频预览
+    property string videocPath1:"" //剪辑后的视频保存的路径
     property int a: 0
     property int timerValue: 0 //生成临时剪切文件的计数器
-    property string mergePath1:""
+    property string mergePath1:""//合并文件路径
     property string mergePath2:""
 
     ListModel{
@@ -140,7 +144,7 @@ Item {
 
                         //文本显示：素材音频的标题
                         Loader{
-                            active: model.mediaType === "audio"
+                           // active: model.mediaType === "audio"
                             anchors {
                                 rightMargin: 10
                                 verticalCenter: parent.verticalCenter // 垂直居中
@@ -238,23 +242,23 @@ Item {
                         VideoOutput{
                             id:out
                             anchors.fill:parent
-                            // //视频实际绘制区域的变化
-                            // onContentRectChanged: {
-                            //     // 绘制边框以可视化实际视频区域
-                            //     videoBorder.width = contentRect.width
-                            //     videoBorder.height = contentRect.height
-                            //     videoBorder.x = contentRect.x
-                            //     videoBorder.y = contentRect.y
-                            // }
+                            //视频实际绘制区域的变化
+                            onContentRectChanged: {
+                                // 绘制边框以可视化实际视频区域
+                                videoBorder.width = contentRect.width
+                                videoBorder.height = contentRect.height
+                                videoBorder.x = contentRect.x
+                                videoBorder.y = contentRect.y
+                            }
 
-                            // // 可视化视频实际区域(紫边框）
-                            // Rectangle {
-                            //     id: videoBorder
-                            //     color: "transparent"
-                            //     border.color: "purple"
-                            //     border.width: 2
-                            //     visible: true
-                            // }
+                            // 可视化视频实际区域(紫边框）
+                            Rectangle {
+                                id: videoBorder
+                                color: "transparent"
+                                border.color: "purple"
+                                border.width: 2
+                                visible: true
+                            }
                         }
                     }
                 }
@@ -307,6 +311,8 @@ Item {
 
                 // 添加一个属性来控制select按钮的可见性
                 property bool showSelectButton: true
+                // 添加一个属性来表示是否有视频正在播放
+                property bool isVideoPlaying: false
 
                 //实例化一个Player
                 Player{
@@ -316,8 +322,21 @@ Item {
                 {
                     RowLayout
                     {
-                        ToolButton{action:act.aa}//start
-                        ToolButton{action:act.bb}//pause
+                        ToolButton{
+                            action:act.aa
+                            enabled: rightRect.isVideoPlaying
+                           // 绑定颜色，当按钮不可用时显示灰色
+                           background: Rectangle {
+                               color: startButton.enabled ? "transparent" : "gray"
+                           }
+                        }//start
+                        ToolButton{
+                            action:act.bb
+                            enabled: rightRect.isVideoPlaying
+                            background: Rectangle {
+                                color: pauseButton.enabled ? "transparent" : "gray"
+                            }
+                        }//pause
                         ToolButton {
                             action: act.cc // stop
                             // 添加停止按钮点击后的处理，点击停止后复现选择按钮
@@ -325,7 +344,11 @@ Item {
                                 rightRect.showSelectButton = true // 显示select按钮
                                 // 原有的停止逻辑
                                 oneplayer.mplay.stop()
+                                rightRect.isVideoPlaying = false // 停止播放时重置状态
                             }
+                            background: Rectangle {
+                                color: stopButton.enabled ? "transparent" : "gray"
+                           }
                         }
                     }
                 }
@@ -351,7 +374,8 @@ Item {
                         text:qsTr("添加素材")
                         color: "purple"
                         anchors.centerIn:select
-                        font.pixelSize: 40
+                        font.pixelSize:  Controller.calculateFontSize(select)
+                        //font.pixelSize: 40
                         Behavior on color {
                             ColorAnimation {
                                 from: "purple"
@@ -364,6 +388,10 @@ Item {
 
                     visible: rightRect.showSelectButton // 绑定可见性到属性
                     onClicked: dialog.open()
+
+                    // 当按钮尺寸变化时，重新计算字体大小
+                   onWidthChanged: text.font.pixelSize = Controller.calculateFontSize(select)
+                   onHeightChanged: text.font.pixelSize = Controller.calculateFontSize(select)
                 }
                 //选择对话框select
                 Dialog {
@@ -405,19 +433,23 @@ Item {
 
                                 //文本显示：素材音频的标题
                                 Loader{
-                                    active: model.mediaType === "audio"
+                                    //active: model.mediaType === "audio"
                                     anchors {
                                         rightMargin: 10
                                         verticalCenter: parent.verticalCenter // 垂直居中
                                         horizontalCenter: parent.horizontalCenter // 水平居中
                                     }
+
+
                                     sourceComponent: Component{
                                         Text{
                                             id:audioText
                                             text:model.title
                                             color:"green"
                                             font.bold: true
+                                            font.pixelSize:Controller.calculateFontSize(parent) // 动态计算字体大小
                                             horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
                                         }
                                     }
                                 }
@@ -447,6 +479,7 @@ Item {
                                         //预览功能的输入路径
                                         inputPathPreview = model.filePath.toString().replace("file://", "") // 视频路径传给后端C++函数实现预览
                                         mergePath2 = model.filePath.toString().replace("file://", "")//第二个要合并的视频的路径
+                                        rightRect.isVideoPlaying = true // 更新状态为正在播放
                                         console.log(mergePath2)
 
                                     }
@@ -573,6 +606,7 @@ Item {
                 anchors.topMargin: 5
                 anchors.left: parent.left
                 anchors.leftMargin: 10
+                property int currentButton: 1
                 Column{
                     //anchors.centerIn:pinkCut
                     spacing: 20
@@ -653,13 +687,11 @@ Item {
                             onTapped: {
                                 isDoubleClicked=false
                                 clickTimer.start()
-                                console.log("jkhgfxdzfgh oneTap:")
                             }
                             onDoubleTapped: {
                                 isDoubleClicked=true
                                 resultText.text = "继续剪切 | 退出"
                                 resultText.color = "lightblue"
-                                console.log("jhgfxdrtdfvh twoTap:")
                                 currentButton = 6
                             }
                         }
@@ -704,9 +736,10 @@ Item {
                         onDoubleClicked: {
                             isDoubleClicked=true
                             resultText.text = "已退出剪切"
-                            resultText.color = "blue"
+                            resultText.color = "lightblue"
                             messageTimer1.start()
                             currentButton = 1
+                            Controller.deletefile("/root/wawawawawa")
                         }
                         //处理单击继续剪切操作
                         Timer{
@@ -954,9 +987,9 @@ Item {
 
                                 ComboBox
                                 {
-                                     id: colorInput
-                                     model: ["white", "red", "green", "blue","black","purple","pink","yellow","orange"]
-                                     Layout.fillWidth: true
+                                    id: colorInput
+                                    model: ["white", "red", "green", "blue","black","purple","pink","yellow","orange"]
+                                    Layout.fillWidth: true
                                  }
                             }
                             RowLayout {
@@ -970,10 +1003,10 @@ Item {
                                 }
                                 ComboBox
                                 {
-                                     id: alphaInput
-                                     model: ["0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"]
-                                     Layout.fillWidth: true
-                                 }
+                                    id: alphaInput
+                                    model: ["0", "0.1", "0.2", "0.3", "0.4", "0.5", "0.6", "0.7", "0.8", "0.9", "1"]
+                                    Layout.fillWidth: true
+                                }
                             }
                             RowLayout {
                                 spacing: 5
@@ -984,60 +1017,60 @@ Item {
                                     font.pixelSize: 14
                                     anchors.verticalCenter: parent.verticalCenter
                                 }
-                                 SpinBox
-                                 {
-                                     id: sizeInput
-                                     from: 10
-                                     to: 72
-                                     value: 24
-                                     Layout.fillWidth: true
-                                 }
+                                SpinBox
+                                {
+                                    id: sizeInput
+                                    from: 10
+                                    to: 72
+                                    value: 24
+                                    Layout.fillWidth: true
+                                }
                             }
                             RowLayout {
-                                   spacing: 5
-                                   Layout.fillWidth: true
+                               spacing: 5
+                               Layout.fillWidth: true
 
-                                    Text {
-                                       text: qsTr("移动模式:")
-                                        font.pixelSize: 14
-                                       anchors.verticalCenter: parent.verticalCenter
-                                   }
+                                Text {
+                                    text: qsTr("移动模式:")
+                                    font.pixelSize: 14
+                                    anchors.verticalCenter: parent.verticalCenter
+                                }
 
-                                   ComboBox {
-                                       id: movementModeInput
-                                       model: [
-                                           qsTr("水平移动"),
-                                           qsTr("上下移动"),
-                                           qsTr("对角线移动"),
-                                           qsTr("固定不变")
-                                       ]
-                                       currentIndex: 0  // 默认选择第一个选项
-                                       Layout.fillWidth: true
-                                   }
-                             }
+                                ComboBox {
+                                    id: movementModeInput
+                                    model: [
+                                        qsTr("水平移动"),
+                                        qsTr("上下移动"),
+                                        qsTr("对角线移动"),
+                                        qsTr("固定不变")
+                                    ]
+                                    currentIndex: 0  // 默认选择第一个选项
+                                    Layout.fillWidth: true
+                                }
+                            }
                             Button {
                                 text: qsTr("确定")
                                 Layout.alignment: Qt.AlignRight
                                 onClicked: {
-                                     var customText = textInput.text;
-                                     var customColor = colorInput.currentText;
-                                     var customSize = sizeInput.value;
+                                    var customText = textInput.text;
+                                    var customColor = colorInput.currentText;
+                                    var customSize = sizeInput.value;
                                     var customAlpha = parseFloat(alphaInput.currentText);
 
-                                     // 将参数传递给 oneplayer.watermark
-                                     oneplayer.watermark.text = customText;
-                                     oneplayer.watermark.color = customColor;
-                                     oneplayer.watermark.size = customSize;
+                                    // 将参数传递给 oneplayer.watermark
+                                    oneplayer.watermark.text = customText;
+                                    oneplayer.watermark.color = customColor;
+                                    oneplayer.watermark.size = customSize;
                                     oneplayer.watermark.alpha = customAlpha;
 
-                                     inputDialog.close();
+                                    inputDialog.close();
 
                                     // 连接 watermarkAdded 信号
-                                       oneplayer.watermark.watermarkAdded.connect(function() {
-                                           statusText.text = qsTr("水印添加成功！");
-                                           statusText.visible = true;
-                                            hideStatusTimer.start(); // 启动定时器
-                                       });
+                                    oneplayer.watermark.watermarkAdded.connect(function() {
+                                        statusText.text = qsTr("水印添加成功！");
+                                        statusText.visible = true;
+                                        hideStatusTimer.start(); // 启动定时器
+                                    });
 
                                     //选择文件路径保存加上水印的视频
                                     //保存的时候将输出路径传给添加水印的函数，将水印添加到视频中
@@ -1046,8 +1079,7 @@ Item {
                             }
                         }
                     }
-
-             }
+                }
             }
             //画中画按钮
             Rectangle{
@@ -1076,7 +1108,6 @@ Item {
                         oneplayer.openAddV.open()
                         addVideo.visible = true
                         currentButton = 2
-
                     }
                 }
                 Button{
@@ -1103,17 +1134,20 @@ Item {
                         onAccepted: {
                             outputPathPip = selectedFile.toString().replace("file://", "")
                             console.log("输出文件路径:", outputPathPip)
+                            const fileName1 = selectedFile.toString().split('/').pop().replace(/\.[^/.]+$/, "")
                             let pipVideoPath = _twoPlay.source.toString().replace("file://", "")
                             let pipDuration = _twoPlay.duration/1000
                             pipper.videoInsertPip(inputPathPreview,pipVideoPath,outputPathPip,pipDuration,addVideo.x/scalePip,addVideo.y/scalePip)
+                            successTimer.start()
                         }
                     }
+
                     Timer{
                         id:successTimer
                         interval:2000
                         onTriggered:{
-                            successText.visible = false;
                             currentButton = 1
+                            successText.visible = false;
                         }
                     }
                     onClicked: {
@@ -1140,9 +1174,9 @@ Item {
                     orientation: ListView.Horizontal
                     spacing:5
 
-                    ScrollBar.horizontal: ScrollBar {
-                        policy: ScrollBar.AlwaysOn
-                    }
+                    // ScrollBar.horizontal: ScrollBar {
+                    //     policy: ScrollBar.AlwaysOn
+                    // }
 
                     model:oneplayer.savemodel
 
@@ -1161,27 +1195,47 @@ Item {
                             }
                         }
                         //视频第一帧显示
-                        Video {
-                            id:_vvvv1
-                            anchors.fill: parent
-                            source: model.filepath
-                            autoPlay: true
-                            muted: true
-                            loops: MediaPlayer.Infinite
-                            onPlaybackStateChanged: {
-                                seek(100)
-                                pause()
+                            Video {
+                                id:_vvvv1
+                                anchors.fill: parent
+                                width: rec1.width
+                                height: rec1.height - 10
+                                source: model.filepath
+                                autoPlay: true
+                                muted: true
+                                loops: MediaPlayer.Infinite
+                                onPlaybackStateChanged: {
+                                    seek(100)
+                                    pause()
+                                }
                             }
-                        }
+                            // Text {
+                            //     id: savetext
+                            //     anchors.fill: parent
+                            //     anchors.right: parent.right
+                            //     //anchors.bottom: parent.bottom
+                            //     //anchors.horizontalCenter: parent.horizontalCenter
+                            //     width: rec1.width
+                            //     // height: rec1.height / 10
+                            //     text:model.filecpath
+                                // font.family: "正楷"
+                                // font.pixelSize:10
+                                // elide:Text.ElideLeft
+                                // color: "#077ec4"
+                            // }
+
 
                         //单击素材播放，双击素材暂停
                         TapHandler {
                             onTapped: {
                                 content.currentPlayingIndex = index
                                 console.log("now music index & currentPlayingIndex is ",index,content.currentPlayingIndex)
-                                oneplayer.mplay.source = model.filepath
-                                console.log("保存的文件路径：",model.filepath)
-                                oneplayer.mplay.play()
+                                videoCPath = model.filepath.toString().replace("file://", "")
+                                console.log("保存的文件路径：",model.filecpath)
+                                //oneplayer.mplay.play()
+                                videoplay.play(videoCPath)
+                                //videocPath1 = model.filecpath
+                                videotext.text = videoCPath
                             }
                         }
                         // 添加颜色过渡动画
@@ -1195,12 +1249,34 @@ Item {
                     }//透明度动画
                 }
             }
+            Rectangle{
+                id:textrect
+                width: parent.width
+                height: parent.height / 15
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                Text{
+                    id:videotext
+                    anchors.fill: parent
+                    width: parent.width
+                    //text:videocPath1
+                    font.family: "正楷"
+                    font.pixelSize:16
+                    color: "#077ec4"
+                    TapHandler{
+                        onTapped: {
+                            videoplay.play(videoCPath)
+                        }
+                    }
+                }
+            }
+
+            }
         }
-    }
 
     Actions{
         id:act
-        a.onTriggered:oneplayer.openfile.open()
+       // a.onTriggered:oneplayer.openfile.open()
         aa.onTriggered: oneplayer.mplay.play()
         bb.onTriggered: oneplayer.mplay.pause()
         cc.onTriggered: {
@@ -1213,4 +1289,9 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
     }
+
+    VideoPlay{
+        id:videoplay
+    }
+
 }

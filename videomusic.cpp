@@ -10,7 +10,7 @@ VideoMusic::VideoMusic(QObject* parent) : QObject{parent} {}
 // 替换视频中的音频
 bool VideoMusic::replaceAudio(const QString& videoPath, const QString& audioPath, const QString& outputPath)
 {
-    QProcess* ffmpeg = new QProcess;
+    ffmpeg = new QProcess(this);
     ffmpeg->start("ffmpeg",
                   {"-y",
                    "-i",

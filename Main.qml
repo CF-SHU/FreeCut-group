@@ -1,3 +1,4 @@
+//Main.qml
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
@@ -24,7 +25,7 @@ ApplicationWindow {
             Menu {
                 title: qsTr("File")
                 MenuItem { action: actions.open }
-                MenuItem { action: actions.save }
+                //MenuItem { action: actions.save }
                 MenuItem { action: actions.quit }
             }
             Menu {
@@ -36,7 +37,7 @@ ApplicationWindow {
         ToolBar {
             RowLayout{
                 ToolButton{ action: actions.open }
-                ToolButton{ action: actions.save }
+               // ToolButton{ action: actions.save }
                 ToolButton{ action: actions.quit }
             }
         }
@@ -55,9 +56,11 @@ ApplicationWindow {
     Actions{
         id:actions
         open.onTriggered:content.dialog.openfile.open()
-        about.onTriggered: oneplayer.about.open()
+        about.onTriggered: aplayer.about.open()
     }
-    // Player{
-    //     id:oneplayer
-    // }
+
+    Player
+    {
+        id:aplayer
+    }
 }

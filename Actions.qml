@@ -1,3 +1,4 @@
+//Actions.qml
 import QtQuick
 import QtQuick.Controls
 import QtMultimedia
@@ -14,7 +15,6 @@ Item {
     property alias aa:_aa
     property alias bb:_bb
     property alias cc:_cc
-   // property alias a:_a
 
     Action {
         id: _open
@@ -42,11 +42,12 @@ Item {
         id: _about
         text: qsTr("关于")
         icon.name: "help-about"
+        //onTriggered: content.oneplayer.about.open();
     }
     Action
     {
         id:_stop
-        text:qsTr("&Stop...")
+        text:qsTr("结束播放")
         icon.name:"media-playback-stop"
         onTriggered:{
             content.mplay.stop()
@@ -55,7 +56,7 @@ Item {
     Action
     {
         id:_pause
-        text:qsTr("&Pause...")
+        text:qsTr("暂停")
         icon.name:"media-playback-pause"
         onTriggered:{
             content.mplay.pause()
@@ -64,7 +65,7 @@ Item {
     Action
     {
         id:_start
-        text:qsTr("&start...")
+        text:qsTr("开始播放")
         icon.name:"media-playback-start"
         onTriggered:{
             content.mplay.play()
@@ -79,19 +80,19 @@ Item {
     Action
     {
         id:_cc
-        text:qsTr("&Stop...")
+        text:qsTr("结束播放")
         icon.name:"media-playback-stop"
     }
     Action
     {
         id:_bb
-        text:qsTr("&Pause...")
+        text:qsTr("暂停")
         icon.name:"media-playback-pause"
     }
     Action
     {
         id:_aa
-        text:qsTr("&start...")
+        text:qsTr("开始播放")
         icon.name:"media-playback-start"
     }
 }
