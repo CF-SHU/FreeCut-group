@@ -83,3 +83,10 @@ function deletefile(filepath)
     cutter.deletedir(filepath)
 }
 
+// 计算字体大小的函数
+function calculateFontSize(select)
+{
+   // 使用按钮的最小尺寸来计算字体大小
+   var minSize = Math.min(select.width, select.height) *0.15; // 15% 的按钮尺寸
+   return Math.max(12, minSize); // 确保字体大小不小于 12
+}

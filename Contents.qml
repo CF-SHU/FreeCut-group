@@ -135,7 +135,7 @@ Item {
 
                         //文本显示：素材音频的标题
                         Loader{
-                            active: model.mediaType === "audio"
+                           // active: model.mediaType === "audio"
                             anchors {
                                 rightMargin: 10
                                 verticalCenter: parent.verticalCenter // 垂直居中
@@ -286,14 +286,13 @@ Item {
                         GradientStop { position: 0.3; color: "black" }
                         GradientStop { position: 0.8; color: "#2a0132" }
                     }
-                // gradient: Gradient {
-                //         GradientStop { position: 0.2; color: "#520162" }
-                //         GradientStop { position: 0.9; color: "#2a0132" }//#520162
-                //     }
-                //border.color:"white"
 
                 // 添加一个属性来控制select按钮的可见性
                 property bool showSelectButton: true
+
+                // 添加一个属性来表示是否有视频正在播放
+                property bool isVideoPlaying: false
+
 
                 //实例化一个Player
                 Player{
@@ -303,8 +302,21 @@ Item {
                 {
                     RowLayout
                     {
-                        ToolButton{action:act.aa}//start
-                        ToolButton{action:act.bb}//pause
+                        ToolButton{
+                            action:act.aa
+                            enabled: rightRect.isVideoPlaying
+                           // 绑定颜色，当按钮不可用时显示灰色
+                           background: Rectangle {
+                               color: startButton.enabled ? "transparent" : "gray"
+                           }
+                        }//start
+                        ToolButton{
+                            action:act.bb
+                            enabled: rightRect.isVideoPlaying
+                            background: Rectangle {
+                                color: pauseButton.enabled ? "transparent" : "gray"
+                            }
+                        }//pause
                         ToolButton {
                             action: act.cc // stop
                             // 添加停止按钮点击后的处理，点击停止后复现选择按钮
@@ -312,7 +324,11 @@ Item {
                                 rightRect.showSelectButton = true // 显示select按钮
                                 // 原有的停止逻辑
                                 oneplayer.mplay.stop()
+                                rightRect.isVideoPlaying = false // 停止播放时重置状态
                             }
+                            background: Rectangle {
+                                color: stopButton.enabled ? "transparent" : "gray"
+                           }
                         }
                     }
                 }
@@ -338,7 +354,8 @@ Item {
                         text:qsTr("添加素材")
                         color: "purple"
                         anchors.centerIn:select
-                        font.pixelSize: 40
+                        font.pixelSize:  Controller.calculateFontSize(select)
+                        //font.pixelSize: 40
                         Behavior on color {
                             ColorAnimation {
                                 from: "purple"
@@ -351,6 +368,10 @@ Item {
 
                     visible: rightRect.showSelectButton // 绑定可见性到属性
                     onClicked: dialog.open()
+
+                    // 当按钮尺寸变化时，重新计算字体大小
+                   onWidthChanged: text.font.pixelSize = Controller.calculateFontSize(select)
+                   onHeightChanged: text.font.pixelSize = Controller.calculateFontSize(select)
                 }
                 //选择对话框select
                 Dialog {
@@ -392,19 +413,23 @@ Item {
 
                                 //文本显示：素材音频的标题
                                 Loader{
-                                    active: model.mediaType === "audio"
+                                    //active: model.mediaType === "audio"
                                     anchors {
                                         rightMargin: 10
                                         verticalCenter: parent.verticalCenter // 垂直居中
                                         horizontalCenter: parent.horizontalCenter // 水平居中
                                     }
+
+
                                     sourceComponent: Component{
                                         Text{
                                             id:audioText
                                             text:model.title
                                             color:"green"
                                             font.bold: true
+                                            font.pixelSize:Controller.calculateFontSize(parent) // 动态计算字体大小
                                             horizontalAlignment: Text.AlignHCenter
+                                            verticalAlignment: Text.AlignVCenter
                                         }
                                     }
                                 }
@@ -434,6 +459,7 @@ Item {
                                         //预览功能的输入路径
                                         inputPathPreview = model.filePath.toString().replace("file://", "") // 视频路径传给后端C++函数实现预览
                                         mergePath2 = model.filePath.toString().replace("file://", "")//第二个要合并的视频的路径
+                                        rightRect.isVideoPlaying = true // 更新状态为正在播放
                                         console.log(mergePath2)
                                     }
                                 }
@@ -1252,7 +1278,7 @@ Item {
 
     Actions{
         id:act
-        a.onTriggered:oneplayer.openfile.open()
+       // a.onTriggered:oneplayer.openfile.open()
         aa.onTriggered: oneplayer.mplay.play()
         bb.onTriggered: oneplayer.mplay.pause()
         cc.onTriggered: {
