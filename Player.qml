@@ -137,6 +137,7 @@ Item {
             savemodel.append({
                 filepath:selectedFile,
                 filename:fileName1,
+                filecpath:outputPath
                              })
         }
     }
@@ -174,6 +175,7 @@ Item {
             savemodel.append({
                 filepath:selectedFile,
                 filename:fileName1,
+                filecpath:outputPath
                              })
         }
     }
@@ -239,6 +241,7 @@ Item {
             savemodel.append({
                 filepath:selectedFile,
                 filename:fileName1,
+                filecpath:outputPath
                              })
         }
     }
@@ -286,6 +289,7 @@ Item {
             savemodel.append({
                 filepath:selectedFile,
                 filename:fileName1,
+                filecpath:outputPath
                              })
         }
     }

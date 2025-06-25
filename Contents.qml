@@ -10,15 +10,14 @@ import Videoclips 1.0
 Item {
     property alias dialog:_dialog
     property int currentPlayingIndex: -1
-    property int currentPlayingIndex1: -1 //?????????
     property alias mplay:_mplayer //素材视频/音频的播放
     property string inputPathPreview: ""
     property string outputPathPip:""//画中画输出路径（用户自定义
-    property var videoCPath: [" ", " ", " "," "," "]
-    property var videoQPath: [" ", " ", " "," "," "]
+    property string videoCPath: ""//剪辑后的视频预览
+    property string videocPath1:"" //剪辑后的视频保存的路径
     property int a: 0
     property int timerValue: 0 //生成临时剪切文件的计数器
-    property string mergePath1:""
+    property string mergePath1:""//合并文件路径
     property string mergePath2:""
 
     ListModel{
@@ -1092,8 +1091,14 @@ Item {
                         onAccepted: {
                             outputPathPip = selectedFile.toString().replace("file://", "")
                             console.log("输出文件路径:", outputPathPip)
+                            const fileName1 = selectedFile.toString().split('/').pop().replace(/\.[^/.]+$/, "")
                             let pipVideoPath = _twoPlay.source.toString().replace("file://", "")
                             let pipDuration = _twoPlay.duration/1000
+                            oneplayer.savemodel.append({
+                                filepath:selectedFile,
+                                filename:fileName1,
+                                filecpath:outputPathPip
+                                                       })
                         //     // 转换位置和尺寸
                         //     const convertedPos = Controller.convertPosition(rightRect, _twoPlay, addVideo.x, addVideo.y)
                         //     const pipSize = Controller.convertSize(rightRect, _twoPlay, addVideo.width, addVideo.height)
@@ -1144,9 +1149,9 @@ Item {
                     orientation: ListView.Horizontal
                     spacing:5
 
-                    ScrollBar.horizontal: ScrollBar {
-                        policy: ScrollBar.AlwaysOn
-                    }
+                    // ScrollBar.horizontal: ScrollBar {
+                    //     policy: ScrollBar.AlwaysOn
+                    // }
 
                     model:oneplayer.savemodel
 
@@ -1165,27 +1170,47 @@ Item {
                             }
                         }
                         //视频第一帧显示
-                        Video {
-                            id:_vvvv1
-                            anchors.fill: parent
-                            source: model.filepath
-                            autoPlay: true
-                            muted: true
-                            loops: MediaPlayer.Infinite
-                            onPlaybackStateChanged: {
-                                seek(100)
-                                pause()
+                            Video {
+                                id:_vvvv1
+                                anchors.fill: parent
+                                width: rec1.width
+                                height: rec1.height - 10
+                                source: model.filepath
+                                autoPlay: true
+                                muted: true
+                                loops: MediaPlayer.Infinite
+                                onPlaybackStateChanged: {
+                                    seek(100)
+                                    pause()
+                                }
                             }
-                        }
+                            // Text {
+                            //     id: savetext
+                            //     anchors.fill: parent
+                            //     anchors.right: parent.right
+                            //     //anchors.bottom: parent.bottom
+                            //     //anchors.horizontalCenter: parent.horizontalCenter
+                            //     width: rec1.width
+                            //     // height: rec1.height / 10
+                            //     text:model.filecpath
+                                // font.family: "正楷"
+                                // font.pixelSize:10
+                                // elide:Text.ElideLeft
+                                // color: "#077ec4"
+                            // }
+
 
                         //单击素材播放，双击素材暂停
                         TapHandler {
                             onTapped: {
                                 content.currentPlayingIndex = index
                                 console.log("now music index & currentPlayingIndex is ",index,content.currentPlayingIndex)
-                                oneplayer.mplay.source = model.filepath
-                                console.log("保存的文件路径：",model.filepath)
-                                oneplayer.mplay.play()
+                                videoCPath = model.filepath.toString().replace("file://", "")
+                                console.log("保存的文件路径：",model.filecpath)
+                                //oneplayer.mplay.play()
+                                videoplay.play(videoCPath)
+                                //videocPath1 = model.filecpath
+                                videotext.text = videoCPath
                             }
                         }
                         // 添加颜色过渡动画
@@ -1198,6 +1223,28 @@ Item {
                         NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 2000 }
                     }//透明度动画
                 }
+            }
+            Rectangle{
+                id:textrect
+                width: parent.width
+                height: parent.height / 15
+                anchors.bottom: parent.bottom
+                anchors.left: parent.left
+                Text{
+                    id:videotext
+                    anchors.fill: parent
+                    width: parent.width
+                    //text:videocPath1
+                    font.family: "正楷"
+                    font.pixelSize:16
+                    color: "#077ec4"
+                    TapHandler{
+                        onTapped: {
+                            videoplay.play(videoCPath)
+                        }
+                    }
+                }
+
             }
 
         }
@@ -1218,4 +1265,9 @@ Item {
         anchors.horizontalCenter: parent.horizontalCenter
         anchors.bottom: parent.bottom
     }
+
+    VideoPlay{
+        id:videoplay
+    }
+
 }

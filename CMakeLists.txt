@@ -16,11 +16,7 @@ qt_add_qml_module(appVideoclips
     SOURCES     main.cpp
     QML_FILES   Main.qml
     QML_FILES Actions.qml
-    QML_FILES
-    QML_FILES
     SOURCES videoplay.h videoplay.cpp
-    QML_FILES
-    QML_FILES
     QML_FILES Player.qml
     QML_FILES Contents.qml
     SOURCES videocutter.h videocutter.cpp
@@ -30,6 +26,7 @@ qt_add_qml_module(appVideoclips
     SOURCES videopip.h videopip.cpp
     SOURCES videomerger.h videomerger.cpp
     SOURCES watermark.h watermark.cpp
+    SOURCES
 )
 
 target_compile_features(appVideoclips PRIVATE cxx_std_23)

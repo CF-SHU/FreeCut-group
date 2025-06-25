@@ -16,4 +16,7 @@ public:
                            const QString& audioPath,
                            const QString& outputPath,
                            std::function<void(bool)> callback);
+
+private:
+    QProcess* ffmpeg;
 };

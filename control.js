@@ -83,11 +83,3 @@ function deletefile(filepath)
     cutter.deletedir(filepath)
 }
 
-// function savefile()
-// {
-//    cutter.savefile("/root/wawawawawa/ccc.mp4",outputPath)
-// }
-// function movefile()
-// {
-//     cutter.movefile("/root/wawawawawa/ccc.mp4",outputPath)
-// }

@@ -1,15 +1,13 @@
 #include "videocutter.h"
 #include <QTimer>
-#include <qdatetime.h>
-#include <qfile.h>
+#include <QFile>
 #include <QRegularExpression>
 #include <QDebug>
 #include <QStandardPaths> // 添加标准路径支持
 #include <QProcess>
 #include <QProcessEnvironment>
 #include <QDateTime>
-#include <qdir.h>
-#include <cstdio>
+#include <QDir>
 
 VideoCutter::VideoCutter(QObject *parent) : QObject(parent), m_process(nullptr) {}
 
@@ -47,24 +45,6 @@ void VideoCutter::cutVideo(const QString &inputPath, const QString &outputPath, 
                         outputPath};
 
     qDebug() << "执行FFmpeg命令: ffmpeg" << args.join(" ");
-
-    //m_process->setProcessChannelMode(QProcess::MergedChannels);
-    //connect(m_process, &QProcess::readyReadStandardOutput, this, &VideoCutter::handleProcessOutput);
-
-    // // 添加错误处理
-    // connect(m_process, &QProcess::errorOccurred, this, [=, this](QProcess::ProcessError error) {
-    //     QString errorMsg = QString("进程错误[%1]: %2").arg(error).arg(m_process->errorString());
-    //     qWarning() << errorMsg;
-    //     emit finished(false, errorMsg);
-    // });
-    // // 捕获标准错误输出
-    // connect(m_process, &QProcess::readyReadStandardError, this, [=, this]() {
-    //     QString errorLog = m_process->readAllStandardError();
-    //     qWarning() << "FFmpeg错误输出:" << errorLog;
-    //     if (errorLog.contains("Error") || errorLog.contains("Invalid")) {
-    //         emit finished(false, "FFmpeg错误: " + errorLog.section('\n', 0, 0));
-    //     }
-    // });
 
     connect(m_process, &QProcess::finished, this, [=, this](int exitCode, QProcess::ExitStatus) {
         QString result = (exitCode == 0) ? "成功" : "失败";
@@ -192,37 +172,6 @@ bool VideoCutter::deletedir(const QString &dirpath)
         return false;
     }
 }
-
-//FFmpeg进程处理跟踪
-/*
-void VideoCutter::handleProcessOutput()
-{
-    QString log = m_process->readAllStandardOutput();
-    qDebug() << "FFmpeg输出:" << log;
-
-    QStringList lines = log.split('\n');
-    for (const QString &line : lines) {
-        if (line.contains("time=")) {
-            static QRegularExpression re(R"(time=(\d+):(\d+):(\d+\.\d+))");
-            QRegularExpressionMatch match = re.match(line);
-
-            if (match.hasMatch()) {
-                qreal hours = match.captured(1).toDouble();
-                qreal minutes = match.captured(2).toDouble();
-                qreal seconds = match.captured(3).toDouble();
-                qreal currentSec = hours * 3600 + minutes * 60 + seconds;
-
-                // //进度计算,0% ~ 100%
-                // if (m_durationSec > 0) {
-                //     double progressPercent = (currentSec / static_cast<double>(m_durationSec)) * 100;
-                //     int progress = qBound(0, static_cast<int>(progressPercent), 100);
-                //     emit progressChanged(progress);
-                // }
-            }
-        }
-    }
-}
-*/
 
 //save：一个视频多次剪切
 bool VideoCutter::savefile(const QString &inputPath, const QString &outputPath)

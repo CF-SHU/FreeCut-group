@@ -14,14 +14,10 @@ public:
 
     Q_INVOKABLE void mergeVideos(const QString& inputPath1, const QString& inputPath2, const QString& outputPath);
 
-    //Q_INVOKABLE void cancel();
-
 signals:
     void progressChanged(int percent);
     void finished(bool success, const QString& message);
 
 private:
     QProcess* m_process;
-    //void setupConnections();
-    //bool validateInputFile(const QString& path);
 };
