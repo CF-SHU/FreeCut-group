@@ -14,7 +14,7 @@ Item {
     property alias openAddV:_openAddV
     //property alias saveSomeCut: _saveSomeCut //暂时没什么用
     property alias videoOutput: out
-
+    property alias saveCutmerge: _saveCutmerge
     property alias openmusic:_openmusic
     property alias savevideofile:_savevideofile
     property alias savemergerfile:_savemergerfile
@@ -157,6 +157,26 @@ Item {
             inputPath = selectedFile.toString().replace("file://", "")
             console.log("输出文件路径:", inputPath)
             //去除openfile.selectedFile的路径中的"file://"
+        }
+    }
+
+    //保存一个视频的切片合并的视频
+    FileDialog{
+        id:_saveCutmerge
+        title: "Save your cut video"
+        currentFolder:StandardPaths.writableLocation(StandardPaths.DocumentsLocation)
+        fileMode:FileDialog.SaveFile
+        nameFilters:[ "Audio files (*.mp4  *.avi *.mkv )" ]
+        onAccepted: {
+            outputPath = selectedFile.toString().replace("file://", "")
+            console.log("输出文件路径:", outputPath)
+            vcm.mergeVideos(outputPath)
+            const fileName1 = selectedFile.toString().split('/').pop().replace(/\.[^/.]+$/, "")
+            savemodel.append({
+                filepath:selectedFile,
+                filename:fileName1,
+                filecpath:outputPath
+                             })
         }
     }
 

@@ -26,7 +26,7 @@ Item {
     property double scalePip: 0 //画中画背景视频的缩放比例
     property string videoCPath: ""//剪辑后的视频预览
     property string videocPath1:"" //剪辑后的视频保存的路径
-    property int a: 0
+    property string file:""//切片合并的临时文件路径
     property int timerValue: 0 //生成临时剪切文件的计数器
     property string mergePath1:""//合并文件路径
     property string mergePath2:""
@@ -902,7 +902,7 @@ Item {
             //水印按钮
             Rectangle {
                 id:addwatermark
-                width:parent.width / 6
+                width:parent.width / 8
                 height: parent.height / 8
                 color: "white"
                 border.color: "gray"
@@ -1084,7 +1084,7 @@ Item {
             //画中画按钮
             Rectangle{
                 id:addVideoButton
-                width:parent.width / 6
+                width:parent.width / 8
                 height: parent.height / 8
                 color: "white"
                 border.color: "gray"
@@ -1270,6 +1270,94 @@ Item {
                     }
                 }
             }
+            Rectangle{
+                id:cutmerges
+                width: parent.width / 8
+                height: parent.height / 8
+                anchors.top: addVideoButton.top
+                anchors.left: addVideoButton.right
+                anchors.leftMargin: parent.width / 140
+                radius: 5
+                Button{
+                    id:startcut
+                    text:qsTr("开始剪切")
+                    width: parent.width / 3
+                    height: parent.height
+                    highlighted: true
+                    function formatTime(milliseconds) {
+                        return Math.floor(milliseconds / 1000); // 返回秒数
+                    }
+                    onClicked: {
+                        console.log("剪切节点1:", formatTime(oneplayer.mplay.position)); // 打印当前时间
+                        cutter.getStartSec(formatTime(oneplayer.mplay.position));
+                    }
+                }
+                Button{
+                    id:endcut
+                    text:qsTr("结束剪切")
+                    width: parent.width / 3
+                    height: parent.height
+                    anchors.left: startcut.right
+                    highlighted: true
+                    function formatTime(milliseconds) {
+                        return Math.floor(milliseconds / 1000); // 返回秒数
+                    }
+                    onClicked: {
+                        console.log("剪切节点2:", formatTime(oneplayer.mplay.position)); // 打印当前时间
+                        cutter.getEndSec(formatTime(oneplayer.mplay.position));
+                        file = Controller.returnpath()
+                        console.log("保存切片视频路径：",file)
+                        vcm.writepath(file)
+                    }
+                }
+                Button{
+                    id:qved
+                    text:qsTr("确定")
+                    width: parent.width / 6
+                    height: parent.height
+                    anchors.left: endcut.right
+                    highlighted: true
+                    onClicked: {
+                        let filecut = oneplayer.mplay.source.toString().replace("file://", "")
+                        console.log("剪切开始：",cutter.returnStartSec())
+                        console.log("剪切开始：",cutter.returnEndSec())
+                        //let path1 = vcm.returndirpath
+                        //console.log("保存切片视频路径：",file)
+                        cutter.cutVideo(filecut,file,cutter.returnStartSec(),cutter.returnEndSec()-cutter.returnStartSec())
+                    }
+                }
+                Button{
+                    id:qved1
+                    text:qsTr("合并")
+                    width: parent.width / 6
+                    height: parent.height
+                    anchors.left: qved.right
+                    highlighted: true
+                    onClicked: {
+                       cutmerges.z = 0
+                        oneplayer.saveCutmerge.open()
+                    }
+                }
+            }
+            Rectangle{
+                id:mergecut
+                width: parent.width / 8
+                height: parent.height / 8
+                anchors.top: addVideoButton.top
+                anchors.left: addVideoButton.right
+                anchors.leftMargin: parent.width / 140
+                radius: 5
+                Button{
+                    id:mergebutton
+                    text:qsTr("合并切片")
+                    anchors.fill: parent
+                    onClicked: {
+                        cutmerges.z = 1
+                        vcm.creadtefile()
+                        //console.log(file)
+                    }
+                }
+            }
 
             }
         }
@@ -1292,6 +1380,10 @@ Item {
 
     VideoPlay{
         id:videoplay
+    }
+
+    VideoCutMerge{
+        id:vcm
     }
 
 }

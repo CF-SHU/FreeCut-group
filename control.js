@@ -128,3 +128,8 @@ function calculateFontSize(select)
    var minSize = Math.min(select.width, select.height) *0.15; // 15% 的按钮尺寸
    return Math.max(12, minSize); // 确保字体大小不小于 12
 }
+
+function returnpath(){
+    let file1 = String(vcm.returndirpath())
+    return file1
+}
