@@ -11,9 +11,15 @@ Item {
     property alias dialog:_dialog
     property int currentPlayingIndex: -1
     property int currentPlayingIndex1: -1 //?????????
+    property bool isDoubleClicked: false //双击单击处理
     property alias mplay:_mplayer //素材视频/音频的播放
     property string inputPathPreview: ""
     property string outputPathPip:""//画中画输出路径（用户自定义
+    // property var preVideoX //画中画功能设置的Property,是预览窗口视频的实际宽度起点
+    // property var preVideoY //画中画功能设置的Property,是预览窗口视频的实际高度起点
+    // property var preVideoWidth //画中画功能设置的Property,是预览窗口视频的实际宽度
+    // property var preVideoHeight //画中画功能设置的Property,是预览窗口视频的实际高度
+    property double scalePip: 0 //画中画背景视频的缩放比例
     property var videoCPath: [" ", " ", " "," "," "]
     property var videoQPath: [" ", " ", " "," "," "]
     property int a: 0
@@ -85,7 +91,7 @@ Item {
 
     ColumnLayout{
         anchors.fill: parent
-        spacing: 0 // 移除间距使布局更紧凑 ？原本是10？
+        spacing: 0 // 移除间距使布局更紧凑
 
         //上面三个窗口的排列
         RowLayout{
@@ -98,15 +104,13 @@ Item {
                 id:left
                 Layout.preferredWidth: parent.width * 0.12
                 Layout.preferredHeight: parent.height - bottomRect.height
-                //color: "black"
+                color: "black"
+                border.width:1
+                border.color:"black"
                 gradient: Gradient {
-                        GradientStop { position: 0.3; color: "black" }
-                        GradientStop { position: 0.8; color: "#2a0132" }
-                    }
-                // gradient: Gradient {
-                //         GradientStop { position: 0.2; color: "#520162" }
-                //         GradientStop { position: 0.9; color: "#2a0132" }//#520162
-                //     }
+                    GradientStop { position: 0.3; color: "black" }
+                    GradientStop { position: 0.8; color: "#2a0132" }
+                }
 
                 ListView{
                     id:videoList
@@ -198,17 +202,14 @@ Item {
             Rectangle{
                 id:mid
                 Layout.preferredWidth: parent.width * 0.38
-                Layout.preferredHeight: left.height
-                //color: "black"
-                gradient: Gradient {
-                        GradientStop { position: 0.3; color: "black" }
-                        GradientStop { position: 0.8; color: "#2a0132" }
-                    }
-                // gradient: Gradient {
-                //         GradientStop { position: 0.2; color: "#520162" }
-                //         GradientStop { position: 0.9; color: "#2a0132" }//#520162
-                //     }
+                Layout.preferredHeight: parent.height - bottomRect.height
+                color: "black"
                 border.width: 1
+                border.color:"black"
+                gradient: Gradient {
+                    GradientStop { position: 0.3; color: "black" }
+                    GradientStop { position: 0.8; color: "#2a0132" }
+                }
 
                 Column{
                     anchors.fill: parent
@@ -224,12 +225,10 @@ Item {
                     Rectangle{
                         width: parent.width
                         height: parent.height
-                        //color: "black"
-                        //opacity:0
                         gradient: Gradient {
-                                GradientStop { position: 0.3; color: "black" }
-                                GradientStop { position: 0.8; color: "#2a0132" }
-                            }
+                            GradientStop { position: 0.3; color: "black" }
+                            GradientStop { position: 0.8; color: "#2a0132" }
+                        }
                         border.width: 1
                         MediaPlayer{
                             id:_mplayer
@@ -239,6 +238,23 @@ Item {
                         VideoOutput{
                             id:out
                             anchors.fill:parent
+                            // //视频实际绘制区域的变化
+                            // onContentRectChanged: {
+                            //     // 绘制边框以可视化实际视频区域
+                            //     videoBorder.width = contentRect.width
+                            //     videoBorder.height = contentRect.height
+                            //     videoBorder.x = contentRect.x
+                            //     videoBorder.y = contentRect.y
+                            // }
+
+                            // // 可视化视频实际区域(紫边框）
+                            // Rectangle {
+                            //     id: videoBorder
+                            //     color: "transparent"
+                            //     border.color: "purple"
+                            //     border.width: 2
+                            //     visible: true
+                            // }
                         }
                     }
                 }
@@ -279,19 +295,15 @@ Item {
             Rectangle{
                 id:rightRect
                 Layout.preferredWidth: parent.width * 0.5
-                Layout.preferredHeight: left.height
+                Layout.preferredHeight: mid.height
                 color:"black"
                 border.color:"black"
+                border.width: 1
                 clip: true // 确保子元素-addVideo矩形不会超出边界显示
                 gradient: Gradient {
-                        GradientStop { position: 0.3; color: "black" }
-                        GradientStop { position: 0.8; color: "#2a0132" }
-                    }
-                // gradient: Gradient {
-                //         GradientStop { position: 0.2; color: "#520162" }
-                //         GradientStop { position: 0.9; color: "#2a0132" }//#520162
-                //     }
-                //border.color:"white"
+                    GradientStop { position: 0.3; color: "black" }
+                    GradientStop { position: 0.8; color: "#2a0132" }
+                }
 
                 // 添加一个属性来控制select按钮的可见性
                 property bool showSelectButton: true
@@ -436,6 +448,7 @@ Item {
                                         inputPathPreview = model.filePath.toString().replace("file://", "") // 视频路径传给后端C++函数实现预览
                                         mergePath2 = model.filePath.toString().replace("file://", "")//第二个要合并的视频的路径
                                         console.log(mergePath2)
+
                                     }
                                 }
 
@@ -483,16 +496,12 @@ Item {
                         target: addVideo
                         onActiveChanged: {
                             if (!active) {
-                                // 记录位置信息
-                                console.log("x,y pg rightRec",rightRect.x,rightRect.y)
-                                addVideo.x = Math.max(0,Math.min(addVideo.x, rightRect.width-addVideo.width))
-                                addVideo.y = Math.max(0,Math.min(addVideo.y, rightRect.height-addVideo.height))
-                                console.log("x,y 12345:",addVideo.x,addVideo.y)
+                                scalePip = oneplayer.videoOutput.drag(addVideo)
                             }
                         }
                     }
 
-                    // 拖动提示
+                    //可拖动文本提示
                     Text {
                         anchors {
                             top: parent.top
@@ -506,25 +515,19 @@ Item {
                         opacity: 0.8
                     }
                 }
-
             }
         }
-
 
         //整体时间轴以及视频处理窗口
         Rectangle{
             id:bottomRect
             Layout.fillWidth: true
-            Layout.preferredHeight: parent.height * 0.4 // 下半部分占50%高度
+            Layout.preferredHeight: parent.height * 0.4 // 下半部分占40%高度
             //color:"#43074f"
-            // gradient: Gradient {
-            //         GradientStop { position: 0.2; color: "#2a0132" }
-            //         GradientStop { position: 0.9; color: "#520162" }
-            //     }
             gradient: Gradient {
-                    GradientStop { position: 0.5; color: "#2a0132" }
-                    GradientStop { position: 0.9; color: "black" }
-                }
+                GradientStop { position: 0.5; color: "#2a0132" }
+                GradientStop { position: 0.9; color: "black" }
+            }
 
             //与预览窗口结合的时间轴 Slider2
             Slider {
@@ -645,27 +648,32 @@ Item {
                         //在双击操作时，会先触发一次单击事件，然后再触发双击事件
                         //所以这里采用计时器clickTimer
                         visible: currentButton === 5
-                        property bool isDoubleClicked: false
 
-                        onDoubleClicked: {
-                            isDoubleClicked=true
-                            resultText.text = "继续剪切 | 退出"
-                            resultText.color = "blue"
-                            currentButton = 6
+                        TapHandler{
+                            onTapped: {
+                                isDoubleClicked=false
+                                clickTimer.start()
+                                console.log("jkhgfxdzfgh oneTap:")
+                            }
+                            onDoubleTapped: {
+                                isDoubleClicked=true
+                                resultText.text = "继续剪切 | 退出"
+                                resultText.color = "lightblue"
+                                console.log("jhgfxdrtdfvh twoTap:")
+                                currentButton = 6
+                            }
                         }
-                        onClicked: {
-                            isDoubleClicked=false
-                            clickTimer.start()
-                        }
+
                         //处理单击保存操作
                         Timer{
                             id:clickTimer
                             interval: 300 // 300毫秒是双击检测的合理时间
                             onTriggered:{
-                                if(button5.isDoubleClicked==false){
+                                if(isDoubleClicked===false){
+                                    console.log("adfdgshdj Save:")
                                     oneplayer.saveCut.open() // 剪切视频保存
                                     resultText.text = "处理中..."
-                                    resultText.color = "blue"
+                                    resultText.color = "lightblue"
                                     messageTimer.start()
                                     currentButton = 1
                                     timerValue = 0
@@ -687,16 +695,18 @@ Item {
                         text:qsTr("单击确认 | 双击退出")
                         visible: currentButton === 6
                         property bool isDoubleClicked: false
+
+                        onClicked: {
+                            isDoubleClicked=false
+                            clickTimer1.start()
+                        }
+
                         onDoubleClicked: {
                             isDoubleClicked=true
                             resultText.text = "已退出剪切"
                             resultText.color = "blue"
                             messageTimer1.start()
                             currentButton = 1
-                        }
-                        onClicked: {
-                            isDoubleClicked=false
-                            clickTimer1.start()
                         }
                         //处理单击继续剪切操作
                         Timer{
@@ -987,9 +997,9 @@ Item {
                                    spacing: 5
                                    Layout.fillWidth: true
 
-                                   Text {
+                                    Text {
                                        text: qsTr("移动模式:")
-                                       font.pixelSize: 14
+                                        font.pixelSize: 14
                                        anchors.verticalCenter: parent.verticalCenter
                                    }
 
@@ -1066,6 +1076,7 @@ Item {
                         oneplayer.openAddV.open()
                         addVideo.visible = true
                         currentButton = 2
+
                     }
                 }
                 Button{
@@ -1094,22 +1105,7 @@ Item {
                             console.log("输出文件路径:", outputPathPip)
                             let pipVideoPath = _twoPlay.source.toString().replace("file://", "")
                             let pipDuration = _twoPlay.duration/1000
-                        //     // 转换位置和尺寸
-                        //     const convertedPos = Controller.convertPosition(rightRect, _twoPlay, addVideo.x, addVideo.y)
-                        //     const pipSize = Controller.convertSize(rightRect, _twoPlay, addVideo.width, addVideo.height)
-
-                        //     pipper.videoInsertPip(
-                        //         inputPathPreview,
-                        //         pipVideoPath,
-                        //         outputPathPip,
-                        //         pipDuration,
-                        //         convertedPos.x,
-                        //         convertedPos.y,
-                        //         pipSize.width,
-                        //         pipSize.height
-                        //     )
-                        // }
-                            pipper.videoInsertPip(inputPathPreview,pipVideoPath,outputPathPip,pipDuration,addVideo.x,addVideo.y)
+                            pipper.videoInsertPip(inputPathPreview,pipVideoPath,outputPathPip,pipDuration,addVideo.x/scalePip,addVideo.y/scalePip)
                         }
                     }
                     Timer{
@@ -1126,7 +1122,79 @@ Item {
                     }
                 }
             }
+            //可以直接点击播放已剪辑好的视频
+            Rectangle{
+                id:savevideo
+                width: parent.width
+                height: parent.height / 3
+                anchors.left: parent.left
+                anchors.top: merge.bottom
+                anchors.topMargin: parent.height / 8
+                gradient: Gradient {
+                    GradientStop { position: 0.3; color: "#2a0132" }
+                    GradientStop { position: 0.8; color: "black" }
+                }
+                ListView{
+                    id:saveVideoView
+                    anchors.fill:parent
+                    orientation: ListView.Horizontal
+                    spacing:5
 
+                    ScrollBar.horizontal: ScrollBar {
+                        policy: ScrollBar.AlwaysOn
+                    }
+
+                    model:oneplayer.savemodel
+
+                    //delegate
+                    delegate:Rectangle{
+                        id:rec1
+                        width:savevideo.width / 10
+                        height:savevideo.height
+                        border.color: "lightblue"
+                        radius: 5 //添加圆角半径
+                        color:{
+                            if (currentPlayingIndex === index) {
+                                return "lightblue" // 播放状态颜色
+                            } else {
+                                index % 2 === 0 ? "#302d2c" : "white"
+                            }
+                        }
+                        //视频第一帧显示
+                        Video {
+                            id:_vvvv1
+                            anchors.fill: parent
+                            source: model.filepath
+                            autoPlay: true
+                            muted: true
+                            loops: MediaPlayer.Infinite
+                            onPlaybackStateChanged: {
+                                seek(100)
+                                pause()
+                            }
+                        }
+
+                        //单击素材播放，双击素材暂停
+                        TapHandler {
+                            onTapped: {
+                                content.currentPlayingIndex = index
+                                console.log("now music index & currentPlayingIndex is ",index,content.currentPlayingIndex)
+                                oneplayer.mplay.source = model.filepath
+                                console.log("保存的文件路径：",model.filepath)
+                                oneplayer.mplay.play()
+                            }
+                        }
+                        // 添加颜色过渡动画
+                        Behavior on color {
+                            ColorAnimation { duration: 1000 }
+                        }
+                    }
+                    //添加动画
+                    add: Transition {
+                        NumberAnimation { property: "opacity"; from: 0; to: 1; duration: 2000 }
+                    }//透明度动画
+                }
+            }
         }
     }
 
@@ -1136,8 +1204,8 @@ Item {
         aa.onTriggered: oneplayer.mplay.play()
         bb.onTriggered: oneplayer.mplay.pause()
         cc.onTriggered: {
-                oneplayer.mplay.stop()
-                rightRect.showSelectButton = true // 确保停止按钮也显示select按钮
+            oneplayer.mplay.stop()
+            rightRect.showSelectButton = true // 确保停止按钮也显示select按钮
         }
     }
     Notification{

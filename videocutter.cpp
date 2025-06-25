@@ -80,6 +80,7 @@ void VideoCutter::cutVideo(const QString &inputPath, const QString &outputPath, 
     });
 
     m_process->start("ffmpeg", args);
+    m_process->waitForFinished();
 }
 
 //管道：ffmplay & ffmpeg, 但不能循环播放

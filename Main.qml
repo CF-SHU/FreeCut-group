@@ -56,6 +56,8 @@ ApplicationWindow {
         id:actions
         open.onTriggered:content.dialog.openfile.open()
         about.onTriggered: oneplayer.about.open()
-
     }
+    // Player{
+    //     id:oneplayer
+    // }
 }
