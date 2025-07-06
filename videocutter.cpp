@@ -16,9 +16,7 @@ void VideoCutter::cutVideo(const QString &inputPath, const QString &outputPath, 
     // 确保输出目录存在
     QDir outputDir = QFileInfo(outputPath).dir();
     if (!outputDir.exists()) {
-        if (!outputDir.mkpath(".")) {
-            qDebug() << "Failed to create output directory:" << outputDir.path();
-        }
+        if (!outputDir.mkpath(".")) { qDebug() << "Failed to create output directory:" << outputDir.path(); }
     }
 
     if (m_process) {
@@ -233,4 +231,37 @@ bool VideoCutter::movefile(const QString &sourcePath, const QString &destination
 
     qDebug() << "Video moved successfully to:" << destinationPath;
     return true;
+}
+
+void VideoCutter::cutVideo1(const QString &inputPath, const QString &outputPath, qint64 startSec, qint64 durationSec)
+{
+    // 确保输出目录存在
+    QDir outputDir = QFileInfo(outputPath).dir();
+    if (!outputDir.exists()) {
+        if (!outputDir.mkpath(".")) { qDebug() << "Failed to create output directory:" << outputDir.path(); }
+    }
+
+    if (m_process) {
+        m_process->kill();
+        m_process->deleteLater();
+        m_process = nullptr; // 重置指针
+    }
+
+    m_process = new QProcess(this);
+
+    QStringList args = {"-y",
+                        "-ss",
+                        QString::number(startSec),
+                        "-i",
+                        inputPath,
+                        "-t",
+                        QString::number(durationSec),
+                        "-c",
+                        "copy",
+                        outputPath};
+
+    qDebug() << "执行FFmpeg命令: ffmpeg" << args.join(" ");
+
+    m_process->start("ffmpeg", args);
+    m_process->waitForFinished();
 }

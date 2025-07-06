@@ -133,3 +133,8 @@ function returnpath(){
     let file1 = String(vcm.returndirpath())
     return file1
 }
+
+function returnfilepath(){
+    let file1 = String(vcm.returnfilepath())
+    return file1
+}

@@ -44,4 +44,5 @@ private:
     int i = 0;
     int a = 0;
     QString path;
+    QString path1;
 };

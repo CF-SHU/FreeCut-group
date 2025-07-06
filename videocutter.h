@@ -19,6 +19,7 @@ public:
     Q_INVOKABLE bool deletedir(const QString &dirpath);
     Q_INVOKABLE bool savefile(const QString &inputPath, const QString &outputPath);
     Q_INVOKABLE bool movefile(const QString &sourcePath, const QString &destinationDir);
+    Q_INVOKABLE void cutVideo1(const QString &inputPath, const QString &outputPath, qint64 startSec, qint64 durationSec);
 
 signals:
     void progressChanged(int percent);                         // 进度更新信号,因为删除了processBar所以无用

@@ -38,14 +38,15 @@ QString VideoCutMerge::returndirpath()
 {
     QString str = QString::number(i);
     path = tempDirPath + "/" + str + ".mp4";
+    path1 = str + ".mp4";
     i++;
     qDebug() << "临时目录中保存的视频文件路径：" << path;
-    return path;
+    return path1;
 }
 
 QString VideoCutMerge::returnfilepath()
 {
-    return tempFilePath;
+    return path;
 }
 
 bool VideoCutMerge::writepath(const QString &content)
@@ -64,8 +65,9 @@ bool VideoCutMerge::writepath(const QString &content)
 
 bool VideoCutMerge::mergeVideos(const QString &outputPath)
 {
+    qDebug() << "合并视频路径666666:" << tempFilePath;
     QFile file(tempFilePath);
-    if (!file.isOpen()) return false;
+    //if (!file.isOpen()) return false;
     if (!QFile::exists(tempFilePath)) {
         qCritical() << "列表文件不存在";
         return false;
@@ -74,15 +76,18 @@ bool VideoCutMerge::mergeVideos(const QString &outputPath)
     // 确保文件内容已写入磁盘
     file.close();
 
+    qDebug() << "合并视频路径1:" << tempFilePath;
     // FFmpeg 命令
     QStringList args;
     args << "-f" << "concat"
          << "-safe" << "0"
          << "-i" << tempFilePath << "-c" << "copy" << outputPath;
 
+    qDebug() << "合并视频路径2:" << tempFilePath;
     QProcess ffmpeg;
     ffmpeg.start("ffmpeg", args);
 
+    qDebug() << "合并视频路径3:" << tempFilePath;
     if (!ffmpeg.waitForStarted()) {
         qCritical() << "无法启动 FFmpeg";
         return false;

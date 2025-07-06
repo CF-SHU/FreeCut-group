@@ -27,6 +27,7 @@ Item {
     property string videoCPath: ""//剪辑后的视频预览
     property string videocPath1:"" //剪辑后的视频保存的路径
     property string file:""//切片合并的临时文件路径
+    property string file1:""
     property int timerValue: 0 //生成临时剪切文件的计数器
     property string mergePath1:""//合并文件路径
     property string mergePath2:""
@@ -1306,7 +1307,8 @@ Item {
                         console.log("剪切节点2:", formatTime(oneplayer.mplay.position)); // 打印当前时间
                         cutter.getEndSec(formatTime(oneplayer.mplay.position));
                         file = Controller.returnpath()
-                        console.log("保存切片视频路径：",file)
+                        file1 = Controller.returnfilepath()
+                        console.log("保存切片视频路径：",file1)
                         vcm.writepath(file)
                     }
                 }
@@ -1323,7 +1325,7 @@ Item {
                         console.log("剪切开始：",cutter.returnEndSec())
                         //let path1 = vcm.returndirpath
                         //console.log("保存切片视频路径：",file)
-                        cutter.cutVideo(filecut,file,cutter.returnStartSec(),cutter.returnEndSec()-cutter.returnStartSec())
+                        cutter.cutVideo1(filecut,file1,cutter.returnStartSec(),cutter.returnEndSec()-cutter.returnStartSec())
                     }
                 }
                 Button{
