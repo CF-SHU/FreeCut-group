@@ -17,11 +17,11 @@ Item {
     property bool isDoubleClicked: false //双击单击处理
 
     property alias mplay:_mplayer //素材视频/音频的播放，MediaPlayer在contents中的实例化
+    property double scalePip: 0 //画中画背景视频的缩放比例
 
     property string inputPathPreview: ""
     property string outputPathPip:""//画中画输出路径（用户自定义
 
-    property double scalePip: 0 //画中画背景视频的缩放比例
     property string videoCPath: ""//剪辑后的视频预览
     property string videocPath1:"" //剪辑后的视频保存的路径
     property string file:""//切片合并的临时文件路径

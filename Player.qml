@@ -26,10 +26,9 @@ Item {
     property alias savevideofile:_savevideofile //保存替换了音频的视频
     property alias savemergerfile:_savemergerfile //合并两个视频的保存，必须是相同的文件
 
-    property alias savemodel:_savemodel //ListModel
+    property alias savemodel:_savemodel //ListModel,用于底部处理好的视频存放
 
-    property alias openfile:_openfile //打开文件导入素材？？_mplay.source
-
+    property alias openfile:_openfile //打开文件导入素材,_mplay.source
 
     property string inputPath: ""
     property string outputPath: "/root/output.mp4"
@@ -154,7 +153,7 @@ Item {
         }
     }
 
-    //打开文件导入素材？？_mplay.source
+    //打开文件导入素材_mplay.source是设置播放视频是新添加的视频
     FileDialog{
         id:_openfile
         title: "Select some videos"
