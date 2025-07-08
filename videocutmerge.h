@@ -15,6 +15,7 @@ class VideoCutMerge : public QObject
 {
     Q_OBJECT
     QML_ELEMENT
+
 public:
     explicit VideoCutMerge(QObject* parent = nullptr);
     Q_INVOKABLE bool creadtefile();

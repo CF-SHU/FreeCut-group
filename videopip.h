@@ -17,10 +17,6 @@ public:
                                     double pipDuration,
                                     double pipX,
                                     double pipY);
-    // int pipX,
-    // int pipY,
-    // int pipWidth,
-    // int pipHeight);
 signals:
     void processingFinished(const QString& outputPath);
     void processingError(const QString& errorMessage);

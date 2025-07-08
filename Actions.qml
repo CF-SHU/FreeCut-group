@@ -42,8 +42,8 @@ Item {
         id: _about
         text: qsTr("关于")
         icon.name: "help-about"
-        //onTriggered: content.oneplayer.about.open();
     }
+
     Action
     {
         id:_stop
@@ -53,6 +53,7 @@ Item {
             content.mplay.stop()
         }
     }
+
     Action
     {
         id:_pause
@@ -62,6 +63,7 @@ Item {
             content.mplay.pause()
         }
     }
+
     Action
     {
         id:_start
@@ -71,6 +73,7 @@ Item {
             content.mplay.play()
         }
     }
+
     Action
     {
         id:_a

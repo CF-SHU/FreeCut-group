@@ -13,7 +13,8 @@ ApplicationWindow {
     width: 640
     height: 480
     visible: true
-    title: qsTr("VideoCut")
+    color:"black"
+    title: qsTr("FreeCut")
 
     // 定义按钮的初始状态
     property int currentButton: 1 // 1: 第一个按钮可见
@@ -25,7 +26,6 @@ ApplicationWindow {
             Menu {
                 title: qsTr("File")
                 MenuItem { action: actions.open }
-                //MenuItem { action: actions.save }
                 MenuItem { action: actions.quit }
             }
             Menu {
@@ -37,7 +37,6 @@ ApplicationWindow {
         ToolBar {
             RowLayout{
                 ToolButton{ action: actions.open }
-               // ToolButton{ action: actions.save }
                 ToolButton{ action: actions.quit }
             }
         }
