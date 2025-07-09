@@ -1,3 +1,4 @@
+//videocutter.h
 #pragma once
 
 #include <QProcess>

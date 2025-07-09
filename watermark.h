@@ -1,3 +1,5 @@
+//watermark.h
+#pragma once
 #include <QQuickPaintedItem>
 #include <QPainter>
 #include <QTimer>

@@ -1,3 +1,4 @@
+//videocutter.cpp
 #include "videocutter.h"
 #include <QTimer>
 #include <QFile>

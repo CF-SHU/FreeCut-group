@@ -863,7 +863,6 @@ Item {
                     highlighted: true
                     onClicked: {
                         mergePath1 = oneplayer.mplay.source.toString().replace("file://", "")//第一个要合并的视频的路径
-                        console.log(mergePath1)
                         dialog.open()
                         mer2.enabled = true
                     }
@@ -1004,28 +1003,6 @@ Item {
                                     from: 10
                                     to: 72
                                     value: 24
-                                    Layout.fillWidth: true
-                                }
-                            }
-                            RowLayout {
-                               spacing: 5
-                               Layout.fillWidth: true
-
-                                Text {
-                                    text: qsTr("移动模式:")
-                                    font.pixelSize: 14
-                                    anchors.verticalCenter: parent.verticalCenter
-                                }
-
-                                ComboBox {
-                                    id: movementModeInput
-                                    model: [
-                                        qsTr("水平移动"),
-                                        qsTr("上下移动"),
-                                        qsTr("对角线移动"),
-                                        qsTr("固定不变")
-                                    ]
-                                    currentIndex: 0  // 默认选择第一个选项
                                     Layout.fillWidth: true
                                 }
                             }
@@ -1271,8 +1248,6 @@ Item {
                     highlighted: true
                     onClicked: {
                         let filecut = oneplayer.mplay.source.toString().replace("file://", "")
-                        console.log("剪切开始：",cutter.returnStartSec())
-                        console.log("剪切开始：",cutter.returnEndSec())
                         cutter.cutVideo1(filecut,file1,cutter.returnStartSec(),cutter.returnEndSec()-cutter.returnStartSec())
                         qved1.enabled = true
                         endcut.enabled = false

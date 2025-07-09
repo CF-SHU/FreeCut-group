@@ -1,3 +1,4 @@
+//videopip.cpp
 #include "videopip.h"
 #include <QDir>
 #include <QDebug>

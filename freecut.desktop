@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=FreeCut
+Comment=Simple video editor
+Exec=freecut
+Icon=freecut
+Terminal=false
+Type=Application
+Categories=AudioVideo;Video;
+Keywords=video;editor;cut;

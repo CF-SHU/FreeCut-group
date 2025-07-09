@@ -1,3 +1,4 @@
+//videocutmerge.cpp
 #include "videocutmerge.h"
 #include <QCoreApplication>
 #include <QTemporaryDir>

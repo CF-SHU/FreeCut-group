@@ -1,3 +1,4 @@
+//videomerger.cpp
 #include "videomerger.h"
 #include <QDebug>
 #include <QProcess>

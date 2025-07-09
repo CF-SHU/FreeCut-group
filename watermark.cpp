@@ -1,3 +1,4 @@
+//watermark.cpp
 #include "watermark.h"
 
 Watermark::Watermark(QQuickItem *parent) : QQuickPaintedItem(parent)

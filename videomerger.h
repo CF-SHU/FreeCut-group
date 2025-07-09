@@ -1,3 +1,4 @@
+//videomerger.h
 #pragma once
 
 #include <QObject>

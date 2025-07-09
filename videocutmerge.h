@@ -1,3 +1,4 @@
+//videocutmerge.h
 #pragma once
 
 #include <QCoreApplication>
