@@ -1,3 +1,10 @@
+# 设置默认构建类型为Release
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "选择构建类型: Debug, Release" FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release")
+endif()
+
+
 cmake_minimum_required(VERSION 3.31.2)
 
 project(Videoclips VERSION 0.1 LANGUAGES CXX)
